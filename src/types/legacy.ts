@@ -18,5 +18,10 @@ export interface LegacyZone {
  * Type guard to check if a zone is using legacy format
  */
 export function isLegacyZone(zone: unknown): zone is LegacyZone {
-  return zone && 'coordinates' in zone && Array.isArray(zone.coordinates);
+  return (
+    zone !== null &&
+    typeof zone === 'object' &&
+    'coordinates' in zone &&
+    Array.isArray((zone as any).coordinates)
+  );
 }
