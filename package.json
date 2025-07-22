@@ -2,7 +2,16 @@
   "name": "leaflet-zone-selector",
   "version": "0.1.0",
   "description": "A React component for interactive geographic zone selection using Leaflet",
-  "keywords": ["leaflet", "react", "map", "zone", "selection", "geographic", "polygon", "geojson"],
+  "keywords": [
+    "leaflet",
+    "react",
+    "map",
+    "zone",
+    "selection",
+    "geographic",
+    "polygon",
+    "geojson"
+  ],
   "homepage": "https://github.com/username/leaflet-zone-selector",
   "bugs": {
     "url": "https://github.com/username/leaflet-zone-selector/issues"
@@ -19,14 +28,20 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/leaflet-zone-selector.es.js",
-      "require": "./dist/leaflet-zone-selector.umd.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/leaflet-zone-selector.umd.js"
     },
-    "./dist/style.css": "./dist/style.css"
+    "./dist/leaflet-zone-selector.css": {
+      "import": "./dist/leaflet-zone-selector.css",
+      "require": "./dist/leaflet-zone-selector.css"
+    }
   },
   "files": [
     "dist"
+  ],
+  "sideEffects": [
+    "*.css"
   ],
   "scripts": {
     "dev": "vite",
@@ -72,6 +87,8 @@
     "jest-environment-jsdom": "^30.0.5",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "rollup-plugin-visualizer": "^6.0.3",
+    "terser": "^5.43.1",
     "ts-jest": "^29.4.0",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",

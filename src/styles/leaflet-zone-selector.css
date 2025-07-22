@@ -1,0 +1,9 @@
+/* Leaflet Zone Selector - Main Styles */
+
+.leaflet-zone-selector {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* Placeholder styles - to be expanded in future issues */
