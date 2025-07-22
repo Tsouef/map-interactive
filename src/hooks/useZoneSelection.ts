@@ -1,4 +1,5 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useReducer, useCallback, useEffect } from 'react';
+import { selectionReducer, initialState } from './selectionReducer';
 import type { Zone, Coordinates } from '../types';
 
 export interface SelectionOptions {
@@ -7,12 +8,6 @@ export interface SelectionOptions {
   initialSelection?: Zone[];
   onSelectionChange?: (zones: Zone[]) => void;
   onHoverChange?: (zone: Zone | null) => void;
-}
-
-export interface SelectionState {
-  selectedZones: Zone[];
-  selectedZoneIds: Set<string>;
-  hoveredZone: Zone | null;
 }
 
 export function useZoneSelection(options: SelectionOptions = {}) {
@@ -24,76 +19,69 @@ export function useZoneSelection(options: SelectionOptions = {}) {
     onHoverChange
   } = options;
 
-  const [selectedZones, setSelectedZones] = useState<Zone[]>(initialSelection);
-  const [hoveredZone, setHoveredZone] = useState<Zone | null>(null);
-
-  const selectedZoneIds = useMemo(
-    () => new Set(selectedZones.map(zone => zone.id)),
-    [selectedZones]
+  const [state, dispatch] = useReducer(
+    selectionReducer,
+    {
+      ...initialState,
+      selectedZones: initialSelection,
+      selectedZoneIds: new Set(initialSelection.map(z => z.id))
+    }
   );
 
   const selectZone = useCallback((zone: Zone) => {
-    setSelectedZones(prev => {
-      const isSelected = prev.some(z => z.id === zone.id);
-
-      if (isSelected) {
-        // Deselect if already selected
-        return prev.filter(z => z.id !== zone.id);
-      }
-
-      if (!multiSelect) {
-        // Single select mode - replace selection
-        return [zone];
-      }
-
-      // Multi-select mode
-      if (maxSelections && prev.length >= maxSelections) {
-        // Max selections reached
-        return prev;
-      }
-
-      return [...prev, zone];
+    dispatch({
+      type: 'SELECT',
+      payload: { zone, multiSelect, maxSelections }
     });
   }, [multiSelect, maxSelections]);
 
   const deselectZone = useCallback((zoneId: string) => {
-    setSelectedZones(prev => prev.filter(zone => zone.id !== zoneId));
+    dispatch({
+      type: 'DESELECT',
+      payload: { zoneId }
+    });
   }, []);
 
   const clearSelection = useCallback(() => {
-    setSelectedZones([]);
+    dispatch({ type: 'CLEAR' });
+  }, []);
+
+  const setHoveredZone = useCallback((zone: Zone | null) => {
+    dispatch({
+      type: 'SET_HOVER',
+      payload: { zone }
+    });
   }, []);
 
   const isZoneSelected = useCallback((zoneId: string): boolean => {
-    return selectedZoneIds.has(zoneId);
-  }, [selectedZoneIds]);
+    return state.selectedZoneIds.has(zoneId);
+  }, [state.selectedZoneIds]);
 
   const getCoordinates = useCallback((): Coordinates[][][] => {
-    return selectedZones.map(zone => zone.coordinates);
-  }, [selectedZones]);
+    return state.selectedZones.map(zone => zone.coordinates);
+  }, [state.selectedZones]);
 
   // Notify selection changes
   useEffect(() => {
-    onSelectionChange?.(selectedZones);
-  }, [selectedZones, onSelectionChange]);
+    onSelectionChange?.(state.selectedZones);
+  }, [state.selectedZones, onSelectionChange]);
 
-  // Handle hover state and notify changes
-  const handleSetHoveredZone = useCallback((zone: Zone | null) => {
-    setHoveredZone(zone);
-    onHoverChange?.(zone);
-  }, [onHoverChange]);
+  // Notify hover changes
+  useEffect(() => {
+    onHoverChange?.(state.hoveredZone);
+  }, [state.hoveredZone, onHoverChange]);
 
   return {
     // State
-    selectedZones,
-    selectedZoneIds,
-    hoveredZone,
+    selectedZones: state.selectedZones,
+    selectedZoneIds: state.selectedZoneIds,
+    hoveredZone: state.hoveredZone,
 
     // Actions
     selectZone,
     deselectZone,
     clearSelection,
-    setHoveredZone: handleSetHoveredZone,
+    setHoveredZone,
 
     // Utilities
     isZoneSelected,
