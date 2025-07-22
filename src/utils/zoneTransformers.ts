@@ -1,13 +1,28 @@
 import type { Zone as AppZone } from '@/types';
 import type { Zone as LayerZone } from '@/components/ZoneLayer/types';
 import type { Polygon } from 'geojson';
+import type { Coordinates } from '@/types';
+
+// Temporary type for legacy app zone structure
+// TODO: Update this file when all components use the new Zone type in Issue #10
+interface LegacyAppZone {
+  id: string;
+  name: string;
+  coordinates: Coordinates[];
+  properties?: {
+    postalCode?: string;
+    [key: string]: unknown;
+  };
+}
 
 /**
  * Transforms an app zone (with coordinates array) to a layer zone (with GeoJSON geometry)
  */
 export function appZoneToLayerZone(appZone: AppZone): LayerZone {
+  // TODO: Remove type assertion when updating to use geometry in Issue #10
+  const legacyZone = appZone as unknown as LegacyAppZone;
   // Ensure the polygon is closed
-  const coordinates = [...appZone.coordinates];
+  const coordinates = [...legacyZone.coordinates];
   if (coordinates.length > 0) {
     const first = coordinates[0];
     const last = coordinates[coordinates.length - 1];
@@ -22,8 +37,8 @@ export function appZoneToLayerZone(appZone: AppZone): LayerZone {
   };
 
   // Calculate bbox
-  const lngs = appZone.coordinates.map(coord => coord[0]);
-  const lats = appZone.coordinates.map(coord => coord[1]);
+  const lngs = legacyZone.coordinates.map((coord: Coordinates) => coord[0]);
+  const lats = legacyZone.coordinates.map((coord: Coordinates) => coord[1]);
   const bbox: [number, number, number, number] = [
     Math.min(...lngs),
     Math.min(...lats),
@@ -44,6 +59,7 @@ export function appZoneToLayerZone(appZone: AppZone): LayerZone {
  * Transforms a layer zone (with GeoJSON geometry) back to an app zone (with coordinates array)
  */
 export function layerZoneToAppZone(layerZone: LayerZone): AppZone {
+  // TODO: Update return type when all components use the new Zone type in Issue #10
   // Extract the outer ring coordinates
   let coordinates: [number, number][] = [];
   
@@ -62,5 +78,5 @@ export function layerZoneToAppZone(layerZone: LayerZone): AppZone {
     name: layerZone.name,
     coordinates,
     properties: layerZone.properties
-  };
+  } as unknown as AppZone;
 }

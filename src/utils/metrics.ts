@@ -1,8 +1,16 @@
 import type { Zone } from '@/types';
+
+// Temporary type for legacy zone structure
+// TODO: Update this file to use Zone.geometry in Issue #12
+interface LegacyZone extends Omit<Zone, 'geometry'> {
+  coordinates: [number, number][];
+}
 import type { SelectionMetrics } from '@/components/LeafletZoneSelector/types';
 
 // Mock implementation for testing
 export function calculateMetrics(zones: Zone[]): SelectionMetrics {
+  // TODO: Remove type assertion when updating to use geometry in Issue #12
+  const legacyZones = zones as unknown as LegacyZone[];
   if (zones.length === 0) {
     return {
       totalArea: 0,
@@ -14,7 +22,7 @@ export function calculateMetrics(zones: Zone[]): SelectionMetrics {
   }
 
   // Mock calculations
-  const allCoordinates = zones.flatMap(zone => zone.coordinates);
+  const allCoordinates = legacyZones.flatMap(zone => zone.coordinates);
   
   const lngs = allCoordinates.map(coord => coord[0]);
   const lats = allCoordinates.map(coord => coord[1]);
