@@ -534,7 +534,7 @@ describe('MapboxZoneSelector Zone Selection Integration', () => {
       if (sourceData.length > 0) {
         const lastData = sourceData[sourceData.length - 1][0];
         const divisionFeatures = lastData.features.filter(
-          (f: any) => f.properties?.type === 'division'
+          (f: { properties?: { type?: string } }) => f.properties?.type === 'division'
         );
         expect(divisionFeatures).toHaveLength(0);
       }

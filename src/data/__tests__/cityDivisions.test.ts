@@ -3,8 +3,6 @@ import {
   loadCityDivisions,
   getCachedDivisions,
   clearCache,
-  type CityDivision,
-  type DivisionData,
   SUPPORTED_CITIES
 } from '../cityDivisions';
 
@@ -115,8 +113,6 @@ describe('cityDivisions', () => {
 
   describe('caching mechanism', () => {
     it('should cache loaded city divisions', async () => {
-      const spy = jest.spyOn(console, 'log');
-      
       // First call - should load
       const divisions1 = await getCityDivisions('paris');
       expect(divisions1).toBeDefined();
