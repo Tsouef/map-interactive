@@ -3,6 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SearchInput } from '../index';
 import type { SearchInputProps, NominatimResult } from '../types';
+import { resetRateLimiter } from '../utils';
 
 // Mock fetch for Nominatim API
 global.fetch = jest.fn();
@@ -20,6 +21,7 @@ describe('SearchInput', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (global.fetch as jest.Mock).mockClear();
+    resetRateLimiter();
   });
 
   describe('Basic Functionality', () => {
@@ -205,7 +207,7 @@ describe('SearchInput', () => {
       await user.type(input, 'Paris');
       
       await waitFor(() => {
-        expect(screen.getByText(/loading/i)).toBeInTheDocument();
+        expect(screen.getByText('Loading...', { selector: '.search-loading' })).toBeInTheDocument();
       });
     });
 
