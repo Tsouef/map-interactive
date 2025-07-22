@@ -108,7 +108,7 @@ describe('EnhancedTileLayer', () => {
       renderWithMap();
       
       const tileLayer = screen.getByTestId('tile-layer');
-      expect(tileLayer).toHaveAttribute('data-error-tile-url', '/images/tile-error.png');
+      expect(tileLayer).toHaveAttribute('data-error-tile-url', '/images/tile-error.svg');
     });
   });
 

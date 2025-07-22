@@ -76,7 +76,7 @@ export const EnhancedTileLayer: React.FC<EnhancedTileLayerProps> = ({
         maxZoom={currentProvider.maxZoom}
         subdomains={currentProvider.subdomains}
         crossOrigin={crossOrigin}
-        errorTileUrl="/images/tile-error.png" // Fallback tile image
+        errorTileUrl="/images/tile-error.svg" // Fallback tile image
       />
       {loadingTiles > 0 && (
         <div className="tile-loading-indicator">
