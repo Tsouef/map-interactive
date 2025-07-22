@@ -58,7 +58,15 @@ export function useZoneSelection(options: SelectionOptions = {}) {
   }, [state.selectedZoneIds]);
 
   const getCoordinates = useCallback((): Coordinates[][][] => {
-    return state.selectedZones.map(zone => zone.coordinates);
+    return state.selectedZones.map(zone => {
+      // Normalize to MultiPolygon format
+      if (Array.isArray(zone.coordinates[0]) && Array.isArray(zone.coordinates[0][0]) && typeof zone.coordinates[0][0][0] === 'number') {
+        // It's a Polygon
+        return zone.coordinates as Coordinates[][];
+      }
+      // It's already a MultiPolygon, return first polygon
+      return (zone.coordinates as Coordinates[][][])[0] || [];
+    });
   }, [state.selectedZones]);
 
   // Notify selection changes

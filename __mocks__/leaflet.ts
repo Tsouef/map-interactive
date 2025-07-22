@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 export const mockMap = {
   on: jest.fn().mockReturnThis(),
   off: jest.fn().mockReturnThis(),

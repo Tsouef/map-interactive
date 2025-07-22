@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export const createControlComponent = (createInstance: any) => {
   return (props: any) => {
     const instance = createInstance(props);

@@ -1,4 +1,4 @@
-import type { Zone } from '../types';
+import type { Zone, Coordinates } from '../types';
 
 // Demo zones for Paris arrondissements (simplified boundaries)
 export const DEMO_ZONES: Zone[] = [
@@ -135,9 +135,14 @@ export const DEMO_GEOJSON = {
       name: zone.name,
       ...zone.properties
     },
-    geometry: {
-      type: 'Polygon' as const,
-      coordinates: zone.coordinates
-    }
+    geometry: Array.isArray(zone.coordinates[0]) && Array.isArray(zone.coordinates[0][0]) && typeof zone.coordinates[0][0][0] === 'number'
+      ? {
+          type: 'Polygon' as const,
+          coordinates: zone.coordinates as Coordinates[][]
+        }
+      : {
+          type: 'MultiPolygon' as const,
+          coordinates: zone.coordinates as Coordinates[][][]
+        }
   }))
 };
