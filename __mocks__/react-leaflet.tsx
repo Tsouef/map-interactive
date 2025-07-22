@@ -1,9 +1,8 @@
 import React from "react";
-import { mockMap } from "./leaflet";
 
 interface MockComponentProps {
   children?: React.ReactNode;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export const MapContainer: React.FC<MockComponentProps> = ({ children, ...props }) => {
@@ -18,7 +17,15 @@ export const TileLayer: React.FC<MockComponentProps & { url?: string }> = ({ url
   return <div data-testid="tile-layer" data-url={url} {...props} />;
 };
 
-export const GeoJSON: React.FC<MockComponentProps & { data?: any; eventHandlers?: any }> = ({
+interface GeoJSONProps extends MockComponentProps {
+  data?: unknown;
+  eventHandlers?: {
+    click?: () => void;
+    [key: string]: (() => void) | undefined;
+  };
+}
+
+export const GeoJSON: React.FC<GeoJSONProps> = ({
   data,
   eventHandlers,
   ...props
@@ -28,7 +35,15 @@ export const GeoJSON: React.FC<MockComponentProps & { data?: any; eventHandlers?
   );
 };
 
-export const Polygon: React.FC<MockComponentProps & { positions?: any; eventHandlers?: any }> = ({
+interface PolygonProps extends MockComponentProps {
+  positions?: number[][];
+  eventHandlers?: {
+    click?: () => void;
+    [key: string]: (() => void) | undefined;
+  };
+}
+
+export const Polygon: React.FC<PolygonProps> = ({
   positions,
   eventHandlers,
   ...props
@@ -38,7 +53,11 @@ export const Polygon: React.FC<MockComponentProps & { positions?: any; eventHand
   );
 };
 
-export const Marker: React.FC<MockComponentProps & { position?: any }> = ({ position, children, ...props }) => {
+interface MarkerProps extends MockComponentProps {
+  position?: [number, number];
+}
+
+export const Marker: React.FC<MarkerProps> = ({ position, children, ...props }) => {
   return (
     <div data-testid="marker" data-position={JSON.stringify(position)} {...props}>
       {children}
@@ -54,14 +73,8 @@ export const Popup: React.FC<MockComponentProps> = ({ children, ...props }) => {
   );
 };
 
-export const useMap = () => mockMap;
-export const useMapEvents = (handlers: Record<string, (...args: any[]) => void>) => {
-  // Mock implementation - just return the mock map
-  Object.keys(handlers).forEach((event) => {
-    mockMap.on(event, handlers[event]);
-  });
-  return mockMap;
-};
+// Re-export hooks from separate file to avoid react-refresh warnings
+export { useMap, useMapEvents } from './react-leaflet-hooks';
 
 export const LayersControl: React.FC<MockComponentProps> = ({ children, ...props }) => {
   return (

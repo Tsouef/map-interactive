@@ -1,13 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export const createControlComponent = (createInstance: any) => {
-  return (props: any) => {
+import React from 'react';
+
+type CreateInstanceFn = (props: Record<string, unknown>) => unknown;
+type UpdateInstanceFn = (instance: unknown, props: Record<string, unknown>, prevProps: Record<string, unknown>) => void;
+
+export const createControlComponent = (createInstance: CreateInstanceFn) => {
+  return (props: Record<string, unknown>) => {
     const instance = createInstance(props);
     return instance;
   };
 };
 
-export const createLayerComponent = (createInstance: any, updateInstance?: any) => {
-  return (props: any) => {
+export const createLayerComponent = (createInstance: CreateInstanceFn, updateInstance?: UpdateInstanceFn) => {
+  return (props: Record<string, unknown>) => {
     const instance = createInstance(props);
     if (updateInstance) {
       updateInstance(instance, props, {});
@@ -24,5 +28,9 @@ export const useLeafletContext = () => ({
   pane: 'overlayPane',
 });
 
-export const LeafletProvider = ({ children }: any) => children;
-export const LeafletConsumer = ({ children }: any) => children;
+interface LeafletProviderProps {
+  children: React.ReactNode;
+}
+
+export const LeafletProvider = ({ children }: LeafletProviderProps) => children;
+export const LeafletConsumer = ({ children }: LeafletProviderProps) => children;

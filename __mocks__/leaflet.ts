@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 export const mockMap = {
   on: jest.fn().mockReturnThis(),
   off: jest.fn().mockReturnThis(),
@@ -42,7 +40,7 @@ export const mockGeoJSON = {
   clearLayers: jest.fn().mockReturnThis(),
   addData: jest.fn().mockReturnThis(),
   setStyle: jest.fn().mockReturnThis(),
-  eachLayer: jest.fn((callback: any) => {
+  eachLayer: jest.fn((callback: (layer: unknown) => void) => {
     // Mock some layers
     const mockLayers = [
       { feature: { properties: { id: 'zone-1' } }, setStyle: jest.fn() },
@@ -98,7 +96,7 @@ export const L = {
   })),
   control: jest.fn(() => mockControl),
   Control: {
-    extend: jest.fn((options: any) => {
+    extend: jest.fn((options: Record<string, unknown>) => {
       return jest.fn(() => ({
         ...mockControl,
         ...options,
