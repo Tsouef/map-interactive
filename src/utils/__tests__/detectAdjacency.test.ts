@@ -1,6 +1,5 @@
 import { detectAdjacency, AdjacencyOptions } from '../detectAdjacency';
 import * as turf from '@turf/turf';
-import type { Feature, Polygon } from 'geojson';
 
 describe('detectAdjacency', () => {
   describe('perfect adjacency', () => {

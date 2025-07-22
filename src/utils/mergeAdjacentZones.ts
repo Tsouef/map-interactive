@@ -119,21 +119,13 @@ export function mergeAdjacentZones(zones: Zone[]): MergedZoneFeature[] {
       // Multiple zones, merge them
       const featuresToMerge = currentGroup.indices.map(idx => features[idx]);
       
-      // Use turf.union with individual features
+      // Use turf.union with all features at once
       let merged: Feature<Polygon | MultiPolygon> | null = null;
       
       try {
-        // Start with the first feature
-        merged = featuresToMerge[0] as Feature<Polygon | MultiPolygon>;
-        
-        // Union with each subsequent feature
-        for (let i = 1; i < featuresToMerge.length; i++) {
-          const unionResult = turf.union(merged as any, featuresToMerge[i] as any);
-          if (unionResult) {
-            merged = unionResult as Feature<Polygon | MultiPolygon>;
-          }
-        }
-      } catch (error) {
+        const fc = turf.featureCollection<Polygon | MultiPolygon>(featuresToMerge);
+        merged = turf.union(fc);
+      } catch {
         // If union fails, skip this group
         // This can happen with certain complex geometries
       }

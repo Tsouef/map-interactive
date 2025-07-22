@@ -173,12 +173,12 @@ describe('mergeAdjacentZones - Performance Benchmarks', () => {
       const zones = createGridZones(30, 30); // 900 zones
       
       // Get initial memory usage (if available)
-      const initialMemory = (performance as any).memory?.usedJSHeapSize || 0;
+      const initialMemory = (performance as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0;
       
       const result = mergeAdjacentZones(zones);
       
       // Get final memory usage
-      const finalMemory = (performance as any).memory?.usedJSHeapSize || 0;
+      const finalMemory = (performance as { memory?: { usedJSHeapSize: number } }).memory?.usedJSHeapSize || 0;
       
       expect(result).toHaveLength(1);
       

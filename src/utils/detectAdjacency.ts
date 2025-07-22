@@ -80,7 +80,7 @@ function areZonesWithinTolerance(
     }
 
     return turf.booleanIntersects(buffered1, buffered2);
-  } catch (error) {
+  } catch {
     // If buffering fails (e.g., for very small or invalid polygons), fall back to distance check
     return calculateMinimumDistance(zone1, zone2) <= toleranceDistance;
   }

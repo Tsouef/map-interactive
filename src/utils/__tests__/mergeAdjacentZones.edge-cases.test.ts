@@ -1,6 +1,5 @@
 import { mergeAdjacentZones } from '../mergeAdjacentZones';
 import type { Zone } from '../../types';
-import * as turf from '@turf/turf';
 
 describe('mergeAdjacentZones - Edge Cases', () => {
   describe('polygons with holes', () => {

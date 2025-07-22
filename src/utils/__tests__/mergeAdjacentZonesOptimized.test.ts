@@ -62,7 +62,7 @@ describe('mergeAdjacentZonesOptimized', () => {
         const optimizedResult = mergeAdjacentZonesOptimized(zones, { useSpatialIndex: true });
 
         // Sort results for comparison
-        const sortByIds = (a: any, b: any) => 
+        const sortByIds = (a: { properties: { mergedZones: string[] } }, b: { properties: { mergedZones: string[] } }) => 
           a.properties.mergedZones.join(',').localeCompare(b.properties.mergedZones.join(','));
         
         originalResult.sort(sortByIds);
@@ -169,7 +169,7 @@ describe('mergeAdjacentZonesOptimized', () => {
         { zoneCount: 2000, expectedMaxGrid: 20 }
       ];
 
-      testCases.forEach(({ zoneCount, expectedMaxGrid }) => {
+      testCases.forEach(({ zoneCount }) => {
         const zones = Array.from({ length: zoneCount }, (_, i) => ({
           id: `zone-${i}`,
           name: `Zone ${i}`,

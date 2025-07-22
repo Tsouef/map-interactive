@@ -3,7 +3,7 @@ import type { Zone, Coordinates } from '../types';
 import type { Feature, Polygon, MultiPolygon } from 'geojson';
 import { detectAdjacency } from './detectAdjacency';
 import { SpatialIndex } from './spatialIndex';
-import type { MergedZoneFeature, MergedZoneProperties } from './mergeAdjacentZones';
+import type { MergedZoneFeature } from './mergeAdjacentZones';
 
 const GAP_TOLERANCE_PERCENTAGE = 0.001; // 0.1% tolerance
 
@@ -230,15 +230,9 @@ function mergeFeatureGroup(
   let merged: Feature<Polygon | MultiPolygon> | null = null;
   
   try {
-    merged = features[0] as Feature<Polygon | MultiPolygon>;
-    
-    for (let i = 1; i < features.length; i++) {
-      const unionResult = turf.union(merged as any, features[i] as any);
-      if (unionResult) {
-        merged = unionResult as Feature<Polygon | MultiPolygon>;
-      }
-    }
-  } catch (error) {
+    const fc = turf.featureCollection<Polygon | MultiPolygon>(features);
+    merged = turf.union(fc);
+  } catch {
     // If union fails, return null
     return null;
   }
