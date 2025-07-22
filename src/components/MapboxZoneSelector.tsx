@@ -125,17 +125,26 @@ export const MapboxZoneSelector = React.memo(forwardRef<
       });
       
       // Handle map load
-      mapInstance.on('load', () => {
+      mapInstance.on('load', async () => {
         setMap(mapInstance);
         onMapLoad?.(mapInstance);
         
-        // Add zones source
-        mapInstance.addSource('zones', {
-          type: 'geojson',
-          data: {
+        // Add zones source with demo data
+        // TODO: Replace with real zone data from API or props
+        let zoneData;
+        try {
+          const { DEMO_GEOJSON } = await import('../data/demoZones');
+          zoneData = DEMO_GEOJSON;
+        } catch {
+          zoneData = {
             type: 'FeatureCollection',
             features: []
-          }
+          };
+        }
+        
+        mapInstance.addSource('zones', {
+          type: 'geojson',
+          data: zoneData
         });
         
         // Add zones fill layer
