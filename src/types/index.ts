@@ -5,7 +5,7 @@ export type Coordinates = [number, number];
 export interface Zone {
   id: string;
   name: string;
-  coordinates: Coordinates[][];
+  coordinates: Coordinates[][] | Coordinates[][][]; // Support both Polygon and MultiPolygon
   properties: {
     postalCode?: string;
     population?: number;
