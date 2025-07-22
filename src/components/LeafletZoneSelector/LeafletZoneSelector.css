@@ -1,0 +1,75 @@
+.leaflet-zone-selector {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.leaflet-zone-selector__map {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Theme: Light */
+.leaflet-zone-selector.light {
+  --zone-default-fill: rgba(59, 130, 246, 0.1);
+  --zone-default-stroke: #3b82f6;
+  --zone-hover-fill: rgba(59, 130, 246, 0.2);
+  --zone-hover-stroke: #2563eb;
+  --zone-selected-fill: rgba(59, 130, 246, 0.3);
+  --zone-selected-stroke: #1d4ed8;
+}
+
+/* Theme: Dark */
+.leaflet-zone-selector.dark {
+  --zone-default-fill: rgba(96, 165, 250, 0.1);
+  --zone-default-stroke: #60a5fa;
+  --zone-hover-fill: rgba(96, 165, 250, 0.2);
+  --zone-hover-stroke: #3b82f6;
+  --zone-selected-fill: rgba(96, 165, 250, 0.3);
+  --zone-selected-stroke: #2563eb;
+}
+
+/* Theme: Custom */
+.leaflet-zone-selector.custom {
+  /* Custom theme will be applied via inline styles or CSS variables */
+}
+
+/* Loading overlay */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.leaflet-zone-selector.dark .loading-overlay {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .leaflet-zone-selector {
+    min-height: 300px;
+  }
+}
+
+/* Leaflet container adjustments */
+.leaflet-zone-selector .leaflet-container {
+  font-family: inherit;
+}
+
+/* Make sure map container has tabindex for keyboard navigation */
+.leaflet-zone-selector .leaflet-container:focus {
+  outline: 2px solid var(--zone-selected-stroke, #3b82f6);
+  outline-offset: -2px;
+}

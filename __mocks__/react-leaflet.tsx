@@ -1,105 +1,46 @@
-import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-refresh/only-export-components */
+import React from 'react';
 
-interface MockComponentProps {
-  children?: React.ReactNode;
-  [key: string]: unknown;
-}
+export const MapContainer = ({ children, ...props }: any) => (
+  <div data-testid="map-container" {...props}>
+    {children}
+  </div>
+);
 
-export const MapContainer: React.FC<MockComponentProps> = ({ children, ...props }) => {
-  return (
-    <div data-testid="map-container" {...props}>
-      {children}
-    </div>
-  );
-};
+export const TileLayer = ({ url, attribution }: any) => (
+  <div data-testid="tile-layer" data-url={url} data-attribution={attribution} />
+);
 
-export const TileLayer: React.FC<MockComponentProps & { url?: string }> = ({ url, ...props }) => {
-  return <div data-testid="tile-layer" data-url={url} {...props} />;
-};
+export const GeoJSON = ({ data, style, onEachFeature, eventHandlers }: any) => (
+  <div 
+    data-testid="geojson-layer" 
+    data-features={JSON.stringify(data)}
+    onClick={eventHandlers?.click}
+    onMouseOver={eventHandlers?.mouseover}
+    onMouseOut={eventHandlers?.mouseout}
+  />
+);
 
-interface GeoJSONProps extends MockComponentProps {
-  data?: unknown;
-  eventHandlers?: {
-    click?: () => void;
-    [key: string]: (() => void) | undefined;
-  };
-}
+export const Polygon = ({ positions, ...props }: any) => (
+  <div data-testid="polygon" data-positions={JSON.stringify(positions)} {...props} />
+);
 
-export const GeoJSON: React.FC<GeoJSONProps> = ({
-  data,
-  eventHandlers,
-  ...props
-}) => {
-  return (
-    <div data-testid="geojson-layer" data-geojson={JSON.stringify(data)} onClick={eventHandlers?.click} {...props} />
-  );
-};
+export const useMap = () => ({
+  setView: jest.fn(),
+  fitBounds: jest.fn(),
+  on: jest.fn(),
+  off: jest.fn(),
+  getZoom: jest.fn(() => 10),
+  getBounds: jest.fn(() => ({
+    getNorth: jest.fn(() => 50),
+    getSouth: jest.fn(() => 40),
+    getEast: jest.fn(() => 10),
+    getWest: jest.fn(() => 0)
+  }))
+});
 
-interface PolygonProps extends MockComponentProps {
-  positions?: number[][];
-  eventHandlers?: {
-    click?: () => void;
-    [key: string]: (() => void) | undefined;
-  };
-}
-
-export const Polygon: React.FC<PolygonProps> = ({
-  positions,
-  eventHandlers,
-  ...props
-}) => {
-  return (
-    <div data-testid="polygon" data-positions={JSON.stringify(positions)} onClick={eventHandlers?.click} {...props} />
-  );
-};
-
-interface MarkerProps extends MockComponentProps {
-  position?: [number, number];
-}
-
-export const Marker: React.FC<MarkerProps> = ({ position, children, ...props }) => {
-  return (
-    <div data-testid="marker" data-position={JSON.stringify(position)} {...props}>
-      {children}
-    </div>
-  );
-};
-
-export const Popup: React.FC<MockComponentProps> = ({ children, ...props }) => {
-  return (
-    <div data-testid="popup" {...props}>
-      {children}
-    </div>
-  );
-};
-
-// Re-export hooks from separate file to avoid react-refresh warnings
-export { useMap, useMapEvents } from './react-leaflet-hooks';
-
-export const LayersControl: React.FC<MockComponentProps> = ({ children, ...props }) => {
-  return (
-    <div data-testid="layers-control" {...props}>
-      {children}
-    </div>
-  );
-};
-
-interface NamedLayerProps extends MockComponentProps {
-  name: string;
-}
-
-export const LayersControlBaseLayer: React.FC<NamedLayerProps> = ({ children, name, ...props }) => {
-  return (
-    <div data-testid={`base-layer-${name}`} {...props}>
-      {children}
-    </div>
-  );
-};
-
-export const LayersControlOverlay: React.FC<NamedLayerProps> = ({ children, name, ...props }) => {
-  return (
-    <div data-testid={`overlay-${name}`} {...props}>
-      {children}
-    </div>
-  );
+export const useMapEvents = (_handlers: any) => {
+  return null;
 };
