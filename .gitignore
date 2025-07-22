@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 .claude 
 CLAUDE.md
+PRD.md
+.mcp.json
+claude-code.json
