@@ -1,7 +1,8 @@
 import { forwardRef, useImperativeHandle, useRef, useState, useEffect, useCallback } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, useMap } from 'react-leaflet';
 import type { Map } from 'leaflet';
 import { useZoneSelection } from '@/hooks/useZoneSelection';
+import { EnhancedTileLayer } from '../TileLayer';
 import { ZoneLayer } from '../ZoneLayer';
 import { SearchInput } from '../SearchInput';
 import { DrawingTools } from '../DrawingTools';
@@ -9,6 +10,7 @@ import { LoadingOverlay } from '../LoadingOverlay';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { exportToFormat } from '@/utils/exportFormats';
 import { calculateMetrics } from '@/utils/metrics';
+import { getDefaultProvider } from '@/config/tileProviders';
 import type { Zone } from '@/types';
 import type { LeafletZoneSelectorProps, LeafletZoneSelectorRef } from './types';
 import 'leaflet/dist/leaflet.css';
@@ -45,6 +47,9 @@ export const LeafletZoneSelector = forwardRef<
   enableDrawing = false,
   enableKeyboardNavigation = true,
   theme = 'light',
+  tileProvider,
+  fallbackTileProvider = 'openstreetmap',
+  detectRetina = true,
   containerClassName,
   containerStyle,
   onSelectionChange,
@@ -52,6 +57,9 @@ export const LeafletZoneSelector = forwardRef<
   onZoneHover,
   onMapReady,
   onError,
+  onTileError,
+  onTileLoadStart,
+  onTileLoad,
   children
 }, ref) => {
   const mapRef = useRef<Map | null>(null);
@@ -156,9 +164,13 @@ export const LeafletZoneSelector = forwardRef<
         keyboard={enableKeyboardNavigation}
       >
         <MapRefHandler onMapReady={handleMapReady} />
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        <EnhancedTileLayer
+          provider={tileProvider || (theme === 'dark' ? 'cartoDBDark' : theme === 'light' ? 'cartoDB' : 'openstreetmap')}
+          fallbackProvider={fallbackTileProvider}
+          detectRetina={detectRetina}
+          onTileError={onTileError}
+          onTileLoadStart={onTileLoadStart}
+          onTileLoad={onTileLoad}
         />
         
         {zones && zones.length > 0 && (

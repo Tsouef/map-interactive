@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { LatLngBoundsExpression, LeafletMouseEvent, Map } from 'leaflet';
 import type { Zone, ExportFormat } from '@/types';
+import type { TileProvider } from '@/config/tileProviders';
 
 // Theme configuration
 export interface ThemeConfig {
@@ -88,12 +89,20 @@ export interface LeafletZoneSelectorProps {
   containerClassName?: string;
   containerStyle?: CSSProperties;
   
+  // Tile Configuration
+  tileProvider?: keyof typeof import('@/config/tileProviders').TILE_PROVIDERS | TileProvider;
+  fallbackTileProvider?: keyof typeof import('@/config/tileProviders').TILE_PROVIDERS;
+  detectRetina?: boolean;
+  
   // Callbacks
   onSelectionChange?: (zones: Zone[]) => void;
   onZoneClick?: (zone: Zone, event: LeafletMouseEvent) => void;
   onZoneHover?: (zone: Zone | null) => void;
   onMapReady?: (map: Map) => void;
   onError?: (error: Error) => void;
+  onTileError?: (error: Error) => void;
+  onTileLoadStart?: () => void;
+  onTileLoad?: () => void;
   
   // Children (for error boundary testing)
   children?: React.ReactNode;
