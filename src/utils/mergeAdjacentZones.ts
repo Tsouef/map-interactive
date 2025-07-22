@@ -2,6 +2,7 @@ import * as turf from '@turf/turf';
 import type { Zone, Coordinates } from '../types';
 import type { Feature, Polygon, MultiPolygon, GeoJsonProperties } from 'geojson';
 import { detectAdjacency } from './detectAdjacency';
+import { mergeAdjacentZonesOptimized, type MergeOptions } from './mergeAdjacentZonesOptimized';
 
 export interface MergedZoneProperties extends GeoJsonProperties {
   mergedZones: string[];
@@ -177,3 +178,6 @@ function areZonesAdjacent(zone1: Feature<Polygon | MultiPolygon>, zone2: Feature
   
   return false;
 }
+
+// Re-export the optimized version and options
+export { mergeAdjacentZonesOptimized, type MergeOptions };
