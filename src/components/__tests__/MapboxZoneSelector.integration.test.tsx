@@ -1,8 +1,8 @@
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, waitFor, act } from '@testing-library/react';
 import { MapboxZoneSelector } from '../MapboxZoneSelector';
 import mapboxgl from 'mapbox-gl';
-import type { Zone } from '../../types';
+import type { MapboxZoneSelectorRef } from '../../types';
 
 describe('MapboxZoneSelector Zone Selection Integration', () => {
   const mockMapboxToken = 'test-token-123';
@@ -233,7 +233,7 @@ describe('MapboxZoneSelector Zone Selection Integration', () => {
 
     it('should handle max selections limit', async () => {
       const onSelectionChange = jest.fn();
-      const ref = React.createRef<any>();
+      const ref = React.createRef<MapboxZoneSelectorRef>();
       
       render(
         <MapboxZoneSelector 
@@ -273,8 +273,8 @@ describe('MapboxZoneSelector Zone Selection Integration', () => {
       await waitFor(() => {
         // Check fill layer styles
         const fillLayer = mapInstance.addLayer.mock.calls.find(
-          (call: any[]) => call[0].id === 'zones-fill'
-        )?.[0];
+          (call: unknown[]) => (call[0] as { id: string }).id === 'zones-fill'
+        )?.[0] as { paint: Record<string, unknown> };
         
         expect(fillLayer.paint).toMatchObject({
           'fill-color': expect.any(Object),
@@ -283,8 +283,8 @@ describe('MapboxZoneSelector Zone Selection Integration', () => {
         
         // Check line layer styles
         const lineLayer = mapInstance.addLayer.mock.calls.find(
-          (call: any[]) => call[0].id === 'zones-line'
-        )?.[0];
+          (call: unknown[]) => (call[0] as { id: string }).id === 'zones-line'
+        )?.[0] as { paint: Record<string, unknown> };
         
         expect(lineLayer.paint).toMatchObject({
           'line-color': expect.any(Object),
@@ -316,7 +316,7 @@ describe('MapboxZoneSelector Zone Selection Integration', () => {
     });
 
     it('should batch state updates for multiple selections', async () => {
-      const ref = React.createRef<any>();
+      const ref = React.createRef<MapboxZoneSelectorRef>();
       render(
         <MapboxZoneSelector 
           ref={ref}

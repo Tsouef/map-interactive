@@ -13,6 +13,7 @@ import type {
 
 // Import Mapbox CSS
 import 'mapbox-gl/dist/mapbox-gl.css';
+import './MapboxZoneSelector.css';
 
 // Default values
 const DEFAULT_CENTER: [number, number] = [2.3522, 48.8566]; // Paris
@@ -63,11 +64,8 @@ export const MapboxZoneSelector = React.memo(forwardRef<
   const {
     selectedZones,
     selectedZoneIds,
-    hoveredZone,
     selectZone,
     clearSelection,
-    isZoneSelected,
-    getCoordinates,
     setHoveredZone
   } = useZoneSelection({
     multiSelect,
