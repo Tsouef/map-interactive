@@ -6,7 +6,7 @@ import { EnhancedTileLayer } from '../../TileLayer';
 // Mock react-leaflet
 jest.mock('react-leaflet', () => ({
   ...jest.requireActual('react-leaflet'),
-  MapContainer: ({ children, ...props }: any) => (
+  MapContainer: ({ children, ...props }: { children: React.ReactNode; [key: string]: unknown }) => (
     <div data-testid="map-container" {...props}>{children}</div>
   ),
   useMap: jest.fn(() => ({
@@ -20,7 +20,7 @@ jest.mock('react-leaflet', () => ({
 
 // Mock our custom components
 jest.mock('../../TileLayer', () => ({
-  EnhancedTileLayer: jest.fn(({ provider, theme }: any) => (
+  EnhancedTileLayer: jest.fn(({ provider, theme }: { provider: string | object; theme?: string }) => (
     <div 
       data-testid="enhanced-tile-layer" 
       data-provider={provider}
@@ -46,7 +46,7 @@ jest.mock('../../LoadingOverlay', () => ({
 }));
 
 jest.mock('../../ErrorBoundary', () => ({
-  ErrorBoundary: ({ children }: any) => <>{children}</>
+  ErrorBoundary: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
 describe('LeafletZoneSelector - Tile Layer Integration', () => {

@@ -10,7 +10,6 @@ import { LoadingOverlay } from '../LoadingOverlay';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { exportToFormat } from '@/utils/exportFormats';
 import { calculateMetrics } from '@/utils/metrics';
-import { getDefaultProvider } from '@/config/tileProviders';
 import type { Zone } from '@/types';
 import type { LeafletZoneSelectorProps, LeafletZoneSelectorRef } from './types';
 import 'leaflet/dist/leaflet.css';

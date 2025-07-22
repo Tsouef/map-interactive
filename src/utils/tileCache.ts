@@ -42,9 +42,11 @@ export class TileCache {
     // Evict old entries if necessary
     while (this.currentSize + blob.size > this.maxSize && this.cache.size > 0) {
       const oldestKey = this.cache.keys().next().value;
-      const oldestEntry = this.cache.get(oldestKey)!;
-      this.cache.delete(oldestKey);
-      this.currentSize -= oldestEntry.data.size;
+      if (oldestKey) {
+        const oldestEntry = this.cache.get(oldestKey)!;
+        this.cache.delete(oldestKey);
+        this.currentSize -= oldestEntry.data.size;
+      }
     }
     
     this.cache.set(url, { data: blob, timestamp: Date.now() });
@@ -81,9 +83,9 @@ export const createCachedTileLayer = (
               tile.src = URL.createObjectURL(blob);
               done(null, tile);
             })
-            .catch(err => done(err, tile));
+            .catch(err => done(err as Error));
         }
-      }).catch(err => done(err, tile));
+      }).catch(err => done(err as Error));
       
       return tile;
     }

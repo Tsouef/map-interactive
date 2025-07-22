@@ -1,7 +1,5 @@
-import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
 import { MapContainer } from 'react-leaflet';
-import L from 'leaflet';
 import { EnhancedTileLayer, EnhancedTileLayerProps } from '../EnhancedTileLayer';
 import { TILE_PROVIDERS } from '../../../config/tileProviders';
 
@@ -23,8 +21,11 @@ jest.mock('react-leaflet', () => ({
 }));
 
 describe('EnhancedTileLayer', () => {
-  let mockMap: any;
-  const mockUseMap = require('react-leaflet').useMap;
+  let mockMap: {
+    on: jest.Mock;
+    off: jest.Mock;
+  };
+  const mockUseMap = jest.requireMock('react-leaflet').useMap as jest.Mock;
 
   beforeEach(() => {
     mockMap = {
@@ -170,7 +171,7 @@ describe('EnhancedTileLayer', () => {
         maxZoom: 18
       };
       
-      const { rerender } = renderWithMap({ 
+      renderWithMap({ 
         provider: customProvider,
         fallbackProvider: 'openstreetmap',
         onTileError 
@@ -283,7 +284,7 @@ describe('EnhancedTileLayer', () => {
         maxZoom: 18
       };
       
-      const { rerender } = renderWithMap({
+      renderWithMap({
         provider: customProvider,
         fallbackProvider: 'openstreetmap'
       });

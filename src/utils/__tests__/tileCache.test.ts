@@ -1,7 +1,7 @@
 import { TileCache } from '../tileCache';
 
 // Mock URL.createObjectURL
-global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
+(global as any).URL.createObjectURL = jest.fn(() => 'blob:mock-url');
 
 describe('TileCache', () => {
   let cache: TileCache;
