@@ -1,8 +1,7 @@
 import React from 'react';
-import { render, waitFor, act } from '@testing-library/react';
+import { render, act, waitFor } from '@testing-library/react';
 import { ZoneLayer } from '../ZoneLayer';
 import type { Zone } from '../../types';
-import mapboxgl from 'mapbox-gl';
 
 // Performance testing utilities
 const measureRenderTime = async (callback: () => void): Promise<number> => {
@@ -16,7 +15,7 @@ const measureRenderTime = async (callback: () => void): Promise<number> => {
 const measureFPS = (duration: number = 1000): Promise<number> => {
   return new Promise((resolve) => {
     let frames = 0;
-    let lastTime = performance.now();
+    const lastTime = performance.now();
     
     const countFrame = (currentTime: number) => {
       frames++;
@@ -33,9 +32,31 @@ const measureFPS = (duration: number = 1000): Promise<number> => {
   });
 };
 
+interface MockMapboxMap {
+  addSource: jest.Mock;
+  addLayer: jest.Mock;
+  removeLayer: jest.Mock;
+  removeSource: jest.Mock;
+  getSource: jest.Mock;
+  getLayer: jest.Mock;
+  setFeatureState: jest.Mock;
+  removeFeatureState: jest.Mock;
+  on: jest.Mock;
+  off: jest.Mock;
+  isStyleLoaded: jest.Mock;
+  loaded: jest.Mock;
+  queryRenderedFeatures: jest.Mock;
+  getCanvas: jest.Mock;
+  getBounds: jest.Mock;
+}
+
+interface MockMapboxSource {
+  setData: jest.Mock;
+}
+
 describe('ZoneLayer Performance Integration Tests', () => {
-  let mockMap: any;
-  let mockSource: any;
+  let mockMap: MockMapboxMap;
+  let mockSource: MockMapboxSource;
 
   beforeEach(() => {
     mockSource = {
@@ -97,7 +118,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       const renderTime = await measureRenderTime(() => {
         render(
           <ZoneLayer
-            map={mockMap}
+            map={mockMap as any}
             zones={zones}
             selectedZoneIds={[]}
             hoveredZoneId={null}
@@ -116,7 +137,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       
       const { rerender } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={zones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -137,7 +158,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       const updateTime = await measureRenderTime(() => {
         rerender(
           <ZoneLayer
-            map={mockMap}
+            map={mockMap as any}
             zones={updatedZones}
             selectedZoneIds={[]}
             hoveredZoneId={null}
@@ -155,7 +176,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       
       const { rerender } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={zones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -168,7 +189,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
           await act(async () => {
             rerender(
               <ZoneLayer
-                map={mockMap}
+                map={mockMap as any}
                 zones={zones}
                 selectedZoneIds={[]}
                 hoveredZoneId={`zone-${i % 100}`}
@@ -201,7 +222,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       // First mock that no layers exist
       const { rerender, unmount } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={zones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -236,7 +257,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
 
         rerender(
           <ZoneLayer
-            map={mockMap}
+            map={mockMap as any}
             zones={newZones}
             selectedZoneIds={[`zone-${i}`]}
             hoveredZoneId={`zone-${i * 2}`}
@@ -282,7 +303,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       const renderTime = await measureRenderTime(() => {
         render(
           <ZoneLayer
-            map={mockMap}
+            map={mockMap as any}
             zones={complexZones}
             selectedZoneIds={[]}
             hoveredZoneId={null}
@@ -308,7 +329,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={zones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -323,7 +344,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       
       const { rerender } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={zones}
           selectedZoneIds={selectedIds}
           hoveredZoneId={null}
@@ -339,7 +360,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       const updateTime = await measureRenderTime(() => {
         rerender(
           <ZoneLayer
-            map={mockMap}
+            map={mockMap as any}
             zones={zones}
             selectedZoneIds={selectedIds.slice(0, 50)}
             hoveredZoneId={null}
@@ -356,9 +377,9 @@ describe('ZoneLayer Performance Integration Tests', () => {
     it('should virtualize rendering for very large datasets', async () => {
       const zones = generateLargeZoneSet(50000);
       
-      const { container } = render(
+      render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={zones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -393,7 +414,7 @@ describe('ZoneLayer Performance Integration Tests', () => {
       
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={zones}
           selectedZoneIds={[]}
           hoveredZoneId={null}

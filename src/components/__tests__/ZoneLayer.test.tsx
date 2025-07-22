@@ -1,15 +1,36 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { ZoneLayer } from '../ZoneLayer';
 import type { Zone } from '../../types';
-import mapboxgl from 'mapbox-gl';
 
 // Mock mapbox-gl
 jest.mock('mapbox-gl');
 
+interface MockMapboxMap {
+  addSource: jest.Mock;
+  addLayer: jest.Mock;
+  removeLayer: jest.Mock;
+  removeSource: jest.Mock;
+  getSource: jest.Mock;
+  getLayer: jest.Mock;
+  setFeatureState: jest.Mock;
+  removeFeatureState: jest.Mock;
+  on: jest.Mock;
+  off: jest.Mock;
+  isStyleLoaded: jest.Mock;
+  loaded: jest.Mock;
+  queryRenderedFeatures: jest.Mock;
+  getCanvas: jest.Mock;
+  getBounds: jest.Mock;
+}
+
+interface MockMapboxSource {
+  setData: jest.Mock;
+}
+
 describe('ZoneLayer', () => {
-  let mockMap: any;
-  let mockSource: any;
+  let mockMap: MockMapboxMap;
+  let mockSource: MockMapboxSource;
   
   const mockZones: Zone[] = [
     {
@@ -73,7 +94,7 @@ describe('ZoneLayer', () => {
     it('should render without crashing', () => {
       const { container } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -86,7 +107,7 @@ describe('ZoneLayer', () => {
     it('should add source and layers to the map', () => {
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -131,7 +152,7 @@ describe('ZoneLayer', () => {
       
       const { unmount } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -150,7 +171,7 @@ describe('ZoneLayer', () => {
     it('should convert zones to GeoJSON format', () => {
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -172,7 +193,7 @@ describe('ZoneLayer', () => {
       
       const { rerender } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -194,7 +215,7 @@ describe('ZoneLayer', () => {
 
       rerender(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={newZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -214,7 +235,7 @@ describe('ZoneLayer', () => {
     it('should apply hover state to zones', () => {
       const { rerender } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -223,7 +244,7 @@ describe('ZoneLayer', () => {
 
       rerender(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId="zone-1"
@@ -239,7 +260,7 @@ describe('ZoneLayer', () => {
     it('should remove hover state when hoveredZoneId changes', () => {
       const { rerender } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId="zone-1"
@@ -248,7 +269,7 @@ describe('ZoneLayer', () => {
 
       rerender(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId="zone-2"
@@ -269,7 +290,7 @@ describe('ZoneLayer', () => {
     it('should apply selected state to zones', () => {
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={['zone-1', 'zone-2']}
           hoveredZoneId={null}
@@ -294,7 +315,7 @@ describe('ZoneLayer', () => {
       
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -327,7 +348,7 @@ describe('ZoneLayer', () => {
       
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -355,7 +376,7 @@ describe('ZoneLayer', () => {
       
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -387,7 +408,7 @@ describe('ZoneLayer', () => {
 
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -432,7 +453,7 @@ describe('ZoneLayer', () => {
     it('should use data-driven styling for states', () => {
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={['zone-1']}
           hoveredZoneId={null}
@@ -470,7 +491,7 @@ describe('ZoneLayer', () => {
 
       const { container } = render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={largeZoneSet}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -503,7 +524,7 @@ describe('ZoneLayer', () => {
 
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={[complexZone]}
           selectedZoneIds={[]}
           hoveredZoneId={null}
@@ -525,7 +546,7 @@ describe('ZoneLayer', () => {
       
       render(
         <ZoneLayer
-          map={mockMap}
+          map={mockMap as any}
           zones={mockZones}
           selectedZoneIds={[]}
           hoveredZoneId={null}

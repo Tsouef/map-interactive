@@ -58,9 +58,8 @@ export const ZoneLayer: React.FC<ZoneLayerProps> = ({
   enableVirtualization = false,
   viewportBuffer = 0.1,
 }) => {
-  const mergedStyles = { ...DEFAULT_STYLES, ...styles };
+  const mergedStyles = useMemo(() => ({ ...DEFAULT_STYLES, ...styles }), [styles]);
   const previousHoveredId = useRef<string | null>(null);
-  const selectedSet = useMemo(() => new Set(selectedZoneIds), [selectedZoneIds]);
   const visibleZonesRef = useRef<Zone[]>(zones);
 
   // Convert zones to GeoJSON FeatureCollection
@@ -114,6 +113,8 @@ export const ZoneLayer: React.FC<ZoneLayerProps> = ({
     if (!map || !enableVirtualization) return;
 
     const bounds = map.getBounds();
+    if (!bounds) return;
+    
     const ne = bounds.getNorthEast();
     const sw = bounds.getSouthWest();
 
