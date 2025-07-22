@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { MapboxZoneSelector } from '../MapboxZoneSelector';
 import mapboxgl from 'mapbox-gl';
 import type { Zone } from '../../types';
@@ -246,9 +246,11 @@ describe('MapboxZoneSelector Zone Selection Integration', () => {
       );
       
       // Select 3 zones using ref methods
-      ref.current?.selectZone('zone-1');
-      ref.current?.selectZone('zone-2');
-      ref.current?.selectZone('zone-3');
+      act(() => {
+        ref.current?.selectZone('zone-1');
+        ref.current?.selectZone('zone-2');
+        ref.current?.selectZone('zone-3');
+      });
       
       await waitFor(() => {
         const lastCall = onSelectionChange.mock.calls[onSelectionChange.mock.calls.length - 1];
@@ -326,9 +328,11 @@ describe('MapboxZoneSelector Zone Selection Integration', () => {
       const mapInstance = (mapboxgl.Map as jest.Mock).mock.results[0].value;
       
       // Select multiple zones rapidly
-      ref.current?.selectZone('zone-1');
-      ref.current?.selectZone('zone-2');
-      ref.current?.selectZone('zone-3');
+      act(() => {
+        ref.current?.selectZone('zone-1');
+        ref.current?.selectZone('zone-2');
+        ref.current?.selectZone('zone-3');
+      });
       
       // Should batch updates efficiently
       await waitFor(() => {
