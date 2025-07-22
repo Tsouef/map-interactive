@@ -8,7 +8,7 @@ export interface Zone {
   coordinates: Coordinates[];
   properties?: {
     postalCode?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
