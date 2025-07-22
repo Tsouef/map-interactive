@@ -1,5 +1,4 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SearchInput } from '../index';
 import type { SearchInputProps, NominatimResult } from '../types';
@@ -17,6 +16,31 @@ describe('SearchInput', () => {
     debounceMs: 300,
     maxResults: 5
   };
+
+  const mockResults: NominatimResult[] = [
+    {
+      place_id: 1,
+      osm_type: 'relation',
+      osm_id: 71525,
+      display_name: 'Paris, Île-de-France, France',
+      lat: '48.8566',
+      lon: '2.3522',
+      boundingbox: ['48.815573', '48.902145', '2.224199', '2.469920'],
+      type: 'city',
+      importance: 0.9
+    },
+    {
+      place_id: 2,
+      osm_type: 'node',
+      osm_id: 12345,
+      display_name: 'Paris, Texas, USA',
+      lat: '33.6609',
+      lon: '-95.5555',
+      boundingbox: ['33.6', '33.7', '-95.6', '-95.5'],
+      type: 'city',
+      importance: 0.7
+    }
+  ];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -77,30 +101,6 @@ describe('SearchInput', () => {
   });
 
   describe('Autocomplete Functionality', () => {
-    const mockResults: NominatimResult[] = [
-      {
-        place_id: 1,
-        osm_type: 'relation',
-        osm_id: 71525,
-        display_name: 'Paris, Île-de-France, France',
-        lat: '48.8566',
-        lon: '2.3522',
-        boundingbox: ['48.815573', '48.902145', '2.224199', '2.469920'],
-        type: 'city',
-        importance: 0.9
-      },
-      {
-        place_id: 2,
-        osm_type: 'node',
-        osm_id: 12345,
-        display_name: 'Paris, Texas, USA',
-        lat: '33.6609',
-        lon: '-95.5555',
-        boundingbox: ['33.6', '33.7', '-95.6', '-95.5'],
-        type: 'city',
-        importance: 0.7
-      }
-    ];
 
     it('should display autocomplete results after typing', async () => {
       const user = userEvent.setup();

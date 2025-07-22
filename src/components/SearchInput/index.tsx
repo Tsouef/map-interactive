@@ -7,7 +7,8 @@ import {
   updateLastRequestTime,
   getRecentSearches,
   saveRecentSearch,
-  isValidPostalCode
+  isValidPostalCode,
+  type RecentSearch
 } from './utils';
 import './SearchInput.css';
 
@@ -94,8 +95,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         setError(null);
         setResults(data.slice(0, maxResults));
       }
-    } catch (err: any) {
-      if (err.name !== 'AbortError') {
+    } catch (err) {
+      if (err instanceof Error && err.name !== 'AbortError') {
         setError(SearchError.NETWORK);
         setResults([]);
       }
@@ -174,7 +175,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
         e.preventDefault();
         if (selectedIndex >= 0 && selectedIndex < items.length) {
           if (showRecent) {
-            const recent = items[selectedIndex] as any;
+            const recent = items[selectedIndex] as RecentSearch;
             // Convert recent search to NominatimResult format
             handleSelectResult({
               place_id: 0,
@@ -234,7 +235,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
-  const recentSearches = useMemo(() => getRecentSearches(), [showRecent]);
+  const recentSearches = useMemo(() => getRecentSearches(), []);
   const hasResults = results.length > 0 || (showRecent && recentSearches.length > 0);
   
   return (

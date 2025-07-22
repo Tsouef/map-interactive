@@ -36,13 +36,13 @@ export function isValidPostalCode(query: string): boolean {
   return Object.values(POSTAL_PATTERNS).some(pattern => pattern.test(query.trim()));
 }
 
-export function debounce<T extends (...args: any[]) => any>(
-  func: T,
+export function debounce<F extends (...args: any[]) => any>(
+  func: F,
   wait: number
-): (...args: Parameters<T>) => void {
-  let timeout: NodeJS.Timeout | null = null;
+): (...args: Parameters<F>) => void {
+  let timeout: ReturnType<typeof setTimeout> | null = null;
   
-  return function(this: any, ...args: Parameters<T>) {
+  return function(this: unknown, ...args: Parameters<F>) {
     const later = () => {
       timeout = null;
       func.apply(this, args);

@@ -74,14 +74,14 @@ export const createCachedTileLayer = (
       cache.get(tileUrl).then(cachedUrl => {
         if (cachedUrl) {
           tile.src = cachedUrl;
-          done(null, tile);
+          done(undefined, tile);
         } else {
           fetch(tileUrl)
             .then(res => res.blob())
             .then(blob => {
               cache.set(tileUrl, blob);
               tile.src = URL.createObjectURL(blob);
-              done(null, tile);
+              done(undefined, tile);
             })
             .catch(err => done(err as Error));
         }
@@ -91,5 +91,6 @@ export const createCachedTileLayer = (
     }
   });
   
-  return new CachedTileLayer(url, options);
+  // @ts-expect-error - Leaflet extend pattern doesn't match TypeScript expectations
+  return new CachedTileLayer(url, options) as L.TileLayer;
 };

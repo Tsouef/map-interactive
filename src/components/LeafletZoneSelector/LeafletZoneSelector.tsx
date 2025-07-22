@@ -207,8 +207,10 @@ export const LeafletZoneSelector = forwardRef<
       
       {enableSearch && (
         <SearchInput
-          onLocationFound={(location) => {
-            mapRef.current?.setView(location.center, 14);
+          onLocationSelect={(location) => {
+            const lat = parseFloat(location.lat);
+            const lon = parseFloat(location.lon);
+            mapRef.current?.setView([lat, lon], 14);
           }}
         />
       )}

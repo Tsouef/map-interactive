@@ -83,7 +83,7 @@ function App() {
             {selectedZones.map(zone => (
               <li key={zone.id}>
                 <strong>{zone.name}</strong>
-                {zone.properties?.population && (
+                {zone.properties?.population && typeof zone.properties.population === 'number' && (
                   <span className="zone-detail">
                     Pop: {zone.properties.population.toLocaleString()}
                   </span>
