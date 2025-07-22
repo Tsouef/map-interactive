@@ -1,6 +1,7 @@
 import * as turf from '@turf/turf';
 import type { Zone } from '../types';
 import type { Feature, Polygon, MultiPolygon, GeoJsonProperties } from 'geojson';
+import { detectAdjacency } from './detectAdjacency';
 
 export interface MergedZoneProperties extends GeoJsonProperties {
   mergedZones: string[];
@@ -117,30 +118,5 @@ export function mergeAdjacentZones(zones: Zone[]): MergedZoneFeature[] {
  * Checks if two zones are adjacent (sharing a border or within tolerance)
  */
 function areZonesAdjacent(zone1: Feature<Polygon>, zone2: Feature<Polygon>): boolean {
-  // First check if they intersect (share a border)
-  if (turf.booleanIntersects(zone1, zone2)) {
-    return true;
-  }
-
-  // Check if they are within tolerance distance
-  const bbox1 = turf.bbox(zone1);
-  const bbox2 = turf.bbox(zone2);
-  
-  // Calculate the diagonal of the bounding box to determine scale
-  const diagonal1 = Math.sqrt(
-    Math.pow(bbox1[2] - bbox1[0], 2) + Math.pow(bbox1[3] - bbox1[1], 2)
-  );
-  const diagonal2 = Math.sqrt(
-    Math.pow(bbox2[2] - bbox2[0], 2) + Math.pow(bbox2[3] - bbox2[1], 2)
-  );
-  
-  // Use the smaller diagonal for tolerance calculation
-  const minDiagonal = Math.min(diagonal1, diagonal2);
-  const tolerance = minDiagonal * GAP_TOLERANCE_PERCENTAGE;
-
-  // Buffer the zones slightly and check for intersection
-  const buffered1 = turf.buffer(zone1, tolerance, { units: 'degrees' });
-  const buffered2 = turf.buffer(zone2, tolerance, { units: 'degrees' });
-
-  return buffered1 && buffered2 && turf.booleanIntersects(buffered1, buffered2);
+  return detectAdjacency(zone1, zone2, { gapTolerance: GAP_TOLERANCE_PERCENTAGE });
 }

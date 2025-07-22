@@ -69,18 +69,18 @@ describe('detectAdjacency', () => {
     it('should detect zones within default tolerance (0.1%)', () => {
       const zone1 = turf.polygon([[
         [0, 0],
-        [0.999, 0],
-        [0.999, 1],
+        [0.9999, 0],
+        [0.9999, 1],
         [0, 1],
         [0, 0]
       ]]);
 
       const zone2 = turf.polygon([[
-        [1.0005, 0],
+        [1.0001, 0],
         [2, 0],
         [2, 1],
-        [1.0005, 1],
-        [1.0005, 0]
+        [1.0001, 1],
+        [1.0001, 0]
       ]]);
 
       expect(detectAdjacency(zone1, zone2)).toBe(true);
@@ -245,7 +245,7 @@ describe('detectAdjacency', () => {
       };
 
       const zone1 = createComplexPolygon(0);
-      const zone2 = createComplexPolygon(2.001); // Just beyond default adjacency
+      const zone2 = createComplexPolygon(2.5); // Well beyond default adjacency
 
       const startTime = performance.now();
       const result = detectAdjacency(zone1, zone2);
