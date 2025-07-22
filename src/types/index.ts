@@ -83,6 +83,7 @@ export interface MapboxZoneSelectorProps {
   
   // Behavior Configuration
   multiSelect?: boolean;
+  maxSelections?: number;
   enableDrawing?: boolean;
   enableSearch?: boolean;
   

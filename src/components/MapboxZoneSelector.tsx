@@ -1,21 +1,34 @@
 import React, { useRef, useEffect, useState, useCallback, useImperativeHandle, forwardRef } from 'react';
 import mapboxgl from 'mapbox-gl';
-import type { Map as MapboxMap, MapMouseEvent } from 'mapbox-gl';
+import type { Map as MapboxMap, MapMouseEvent, GeoJSONSource } from 'mapbox-gl';
+import { useZoneSelection } from '../hooks/useZoneSelection';
 import type { 
   MapboxZoneSelectorProps, 
   MapboxZoneSelectorRef, 
   Zone, 
   ThemeObject,
-  MapboxEvent 
+  MapboxEvent,
+  Coordinates
 } from '../types';
 
 // Import Mapbox CSS
 import 'mapbox-gl/dist/mapbox-gl.css';
+import './MapboxZoneSelector.css';
 
 // Default values
 const DEFAULT_CENTER: [number, number] = [2.3522, 48.8566]; // Paris
 const DEFAULT_ZOOM = 10;
 const DEFAULT_MAP_STYLE = 'mapbox://styles/mapbox/light-v11';
+
+// Default colors for zones
+const DEFAULT_COLORS = {
+  normal: '#3b82f6',
+  hover: '#60a5fa',
+  selected: '#1d4ed8',
+  border: '#1e40af',
+  borderHover: '#1e3a8a',
+  borderSelected: '#1e293b'
+};
 
 export const MapboxZoneSelector = React.memo(forwardRef<
   MapboxZoneSelectorRef,
@@ -26,6 +39,7 @@ export const MapboxZoneSelector = React.memo(forwardRef<
   initialZoom = DEFAULT_ZOOM,
   mapStyle = DEFAULT_MAP_STYLE,
   multiSelect = true,
+  maxSelections,
   // enableDrawing = false,
   // enableSearch = true,
   onSelectionChange,
@@ -38,13 +52,29 @@ export const MapboxZoneSelector = React.memo(forwardRef<
 }, ref) => {
   // State
   const [map, setMap] = useState<MapboxMap | null>(null);
-  const [selectedZones, setSelectedZones] = useState<Map<string, Zone>>(new Map());
   const [error, setError] = useState<Error | null>(null);
+  const [zonesLoaded, setZonesLoaded] = useState(false);
   
   // Refs
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const liveRegionRef = useRef<HTMLDivElement>(null);
-  const selectedZonesRef = useRef<Map<string, Zone>>(new Map());
+  const hoveredZoneIdRef = useRef<string | null>(null);
+  
+  // Use zone selection hook
+  const {
+    selectedZones,
+    selectedZoneIds,
+    selectZone,
+    clearSelection,
+    setHoveredZone
+  } = useZoneSelection({
+    multiSelect,
+    maxSelections,
+    onSelectionChange: useCallback((zones: Zone[]) => {
+      const coordinates = zones.map(z => z.coordinates);
+      onSelectionChange?.(zones, coordinates);
+    }, [onSelectionChange])
+  });
   
   // Convert dimensions to strings if numeric
   const heightStr = typeof height === 'number' ? `${height}px` : height;
@@ -56,45 +86,20 @@ export const MapboxZoneSelector = React.memo(forwardRef<
     onError?.(error);
   }, [onError]);
   
-  // Handle map click
-  const handleMapClick = useCallback((e: MapMouseEvent) => {
-    if (!map) return;
-    
-    // Create a mock zone for now
-    const zone: Zone = {
-      id: `zone-${Date.now()}`,
-      name: `Zone at ${e.lngLat.lat.toFixed(4)}, ${e.lngLat.lng.toFixed(4)}`,
-      coordinates: [[[e.lngLat.lng, e.lngLat.lat]]], // Mock coordinates
-      properties: {},
-    };
-    
-    // Create event object
-    const event: MapboxEvent = {
-      lngLat: e.lngLat,
-      point: e.point,
-      originalEvent: e.originalEvent,
-      target: map,
-      type: e.type,
-    };
-    
-    // Call zone click callback
-    onZoneClick?.(zone, event);
-    
-    // Handle selection
-    if (multiSelect) {
-      setSelectedZones(prev => {
-        const newSelection = new Map(prev);
-        if (newSelection.has(zone.id)) {
-          newSelection.delete(zone.id);
-        } else {
-          newSelection.set(zone.id, zone);
-        }
-        return newSelection;
-      });
-    } else {
-      setSelectedZones(new Map([[zone.id, zone]]));
+  // Get theme colors
+  const getThemeColors = useCallback(() => {
+    if (typeof theme === 'object') {
+      return {
+        normal: theme.colors.primary,
+        hover: theme.colors.hover,
+        selected: theme.colors.selected,
+        border: theme.colors.border,
+        borderHover: theme.colors.hover,
+        borderSelected: theme.colors.selected
+      };
     }
-  }, [map, multiSelect, onZoneClick]);
+    return DEFAULT_COLORS;
+  }, [theme]);
   
   // Initialize map
   useEffect(() => {
@@ -120,9 +125,81 @@ export const MapboxZoneSelector = React.memo(forwardRef<
       });
       
       // Handle map load
-      mapInstance.on('load', () => {
+      mapInstance.on('load', async () => {
         setMap(mapInstance);
         onMapLoad?.(mapInstance);
+        
+        // Add zones source with demo data
+        // TODO: Replace with real zone data from API or props
+        let zoneData;
+        try {
+          const { DEMO_GEOJSON } = await import('../data/demoZones');
+          zoneData = DEMO_GEOJSON;
+        } catch {
+          zoneData = {
+            type: 'FeatureCollection',
+            features: []
+          };
+        }
+        
+        mapInstance.addSource('zones', {
+          type: 'geojson',
+          data: zoneData
+        });
+        
+        // Add zones fill layer
+        const colors = getThemeColors();
+        
+        mapInstance.addLayer({
+          id: 'zones-fill',
+          type: 'fill',
+          source: 'zones',
+          paint: {
+            'fill-color': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              colors.selected,
+              ['boolean', ['feature-state', 'hover'], false],
+              colors.hover,
+              colors.normal
+            ],
+            'fill-opacity': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              0.7,
+              ['boolean', ['feature-state', 'hover'], false],
+              0.5,
+              0.3
+            ]
+          }
+        });
+        
+        // Add zones line layer
+        mapInstance.addLayer({
+          id: 'zones-line',
+          type: 'line',
+          source: 'zones',
+          paint: {
+            'line-color': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              colors.borderSelected,
+              ['boolean', ['feature-state', 'hover'], false],
+              colors.borderHover,
+              colors.border
+            ],
+            'line-width': [
+              'case',
+              ['boolean', ['feature-state', 'selected'], false],
+              3,
+              ['boolean', ['feature-state', 'hover'], false],
+              2,
+              1
+            ]
+          }
+        });
+        
+        setZonesLoaded(true);
       });
       
       // Store map instance
@@ -135,19 +212,182 @@ export const MapboxZoneSelector = React.memo(forwardRef<
     } catch (err) {
       handleError(err as Error);
     }
-  }, [mapboxToken, mapStyle, initialCenter, initialZoom, onMapLoad, handleError]);
+  }, [mapboxToken, mapStyle, initialCenter, initialZoom, onMapLoad, handleError, getThemeColors]);
   
-  // Handle map click events
-  useEffect(() => {
-    if (!map) return;
+  // Handle zone click
+  const handleZoneClick = useCallback((e: MapMouseEvent) => {
+    if (!map || !zonesLoaded) return;
     
-    const clickHandler = (e: MapMouseEvent) => handleMapClick(e);
-    map.on('click', clickHandler);
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ['zones-fill']
+    });
+    
+    if (features.length > 0) {
+      const feature = features[0];
+      const zone: Zone = {
+        id: feature.properties?.id || `zone-${Date.now()}`,
+        name: feature.properties?.name || 'Unknown Zone',
+        coordinates: feature.geometry.type === 'Polygon' ? 
+          feature.geometry.coordinates as Coordinates[][] : 
+          [[[e.lngLat.lng, e.lngLat.lat]]],
+        properties: {
+          ...feature.properties,
+          postalCode: feature.properties?.postalCode
+        }
+      };
+      
+      // Create event object
+      const event: MapboxEvent = {
+        lngLat: e.lngLat,
+        point: e.point,
+        originalEvent: e.originalEvent,
+        target: map,
+        type: e.type,
+      };
+      
+      // Call zone click callback
+      onZoneClick?.(zone, event);
+      
+      // Handle selection
+      selectZone(zone);
+    }
+  }, [map, zonesLoaded, selectZone, onZoneClick]);
+  
+  // Handle zone hover
+  const handleZoneHover = useCallback((e: MapMouseEvent) => {
+    if (!map || !zonesLoaded) return;
+    
+    const features = map.queryRenderedFeatures(e.point, {
+      layers: ['zones-fill']
+    });
+    
+    if (features.length > 0) {
+      const feature = features[0];
+      const zoneId = feature.properties?.id;
+      
+      if (zoneId && hoveredZoneIdRef.current !== zoneId) {
+        // Remove previous hover state
+        if (hoveredZoneIdRef.current) {
+          map.removeFeatureState(
+            { source: 'zones', id: hoveredZoneIdRef.current }
+          );
+        }
+        
+        // Set new hover state
+        map.setFeatureState(
+          { source: 'zones', id: zoneId },
+          { hover: true }
+        );
+        
+        hoveredZoneIdRef.current = zoneId;
+        
+        // Update hover state in hook
+        const zone: Zone = {
+          id: zoneId,
+          name: feature.properties?.name || 'Unknown Zone',
+          coordinates: feature.geometry.type === 'Polygon' ? 
+            feature.geometry.coordinates as Coordinates[][] : 
+            [],
+          properties: feature.properties || {}
+        };
+        setHoveredZone(zone);
+      }
+      
+      map.getCanvas().style.cursor = 'pointer';
+    } else {
+      // Clear hover state
+      if (hoveredZoneIdRef.current) {
+        map.removeFeatureState(
+          { source: 'zones', id: hoveredZoneIdRef.current }
+        );
+        hoveredZoneIdRef.current = null;
+        setHoveredZone(null);
+      }
+      map.getCanvas().style.cursor = '';
+    }
+  }, [map, zonesLoaded, setHoveredZone]);
+  
+  // Update zone selection states
+  useEffect(() => {
+    if (!map || !zonesLoaded) return;
+    
+    // Update feature states for selected zones
+    const source = map.getSource('zones') as GeoJSONSource;
+    if (!source) return;
+    
+    // Clear all selected states first
+    // Note: In a real implementation, you'd track all zone IDs
+    // For now, we'll update the paint property expressions
+    
+    // Update paint properties to reflect selection
+    map.setPaintProperty('zones-fill', 'fill-color', [
+      'case',
+      ['in', ['get', 'id'], ['literal', Array.from(selectedZoneIds)]],
+      getThemeColors().selected,
+      ['boolean', ['feature-state', 'hover'], false],
+      getThemeColors().hover,
+      getThemeColors().normal
+    ]);
+    
+    map.setPaintProperty('zones-fill', 'fill-opacity', [
+      'case',
+      ['in', ['get', 'id'], ['literal', Array.from(selectedZoneIds)]],
+      0.7,
+      ['boolean', ['feature-state', 'hover'], false],
+      0.5,
+      0.3
+    ]);
+    
+    map.setPaintProperty('zones-line', 'line-color', [
+      'case',
+      ['in', ['get', 'id'], ['literal', Array.from(selectedZoneIds)]],
+      getThemeColors().borderSelected,
+      ['boolean', ['feature-state', 'hover'], false],
+      getThemeColors().borderHover,
+      getThemeColors().border
+    ]);
+    
+    map.setPaintProperty('zones-line', 'line-width', [
+      'case',
+      ['in', ['get', 'id'], ['literal', Array.from(selectedZoneIds)]],
+      3,
+      ['boolean', ['feature-state', 'hover'], false],
+      2,
+      1
+    ]);
+    
+  }, [map, zonesLoaded, selectedZoneIds, getThemeColors]);
+  
+  // Set up event handlers
+  useEffect(() => {
+    if (!map || !zonesLoaded) return;
+    
+    const handleMouseLeave = () => {
+      if (hoveredZoneIdRef.current) {
+        map.removeFeatureState(
+          { source: 'zones', id: hoveredZoneIdRef.current }
+        );
+        hoveredZoneIdRef.current = null;
+        setHoveredZone(null);
+      }
+      map.getCanvas().style.cursor = '';
+    };
+    
+    // Click handler
+    map.on('click', 'zones-fill', handleZoneClick);
+    
+    // Hover handlers
+    map.on('mouseenter', 'zones-fill', handleZoneHover);
+    map.on('mousemove', 'zones-fill', handleZoneHover);
+    map.on('mouseleave', 'zones-fill', handleMouseLeave);
     
     return () => {
-      map.off('click', clickHandler);
+      map.off('click', 'zones-fill', handleZoneClick);
+      map.off('mouseenter', 'zones-fill', handleZoneHover);
+      map.off('mousemove', 'zones-fill', handleZoneHover);
+      map.off('mouseleave', 'zones-fill', handleMouseLeave);
     };
-  }, [map, handleMapClick]);
+  }, [map, zonesLoaded, handleZoneClick, handleZoneHover, setHoveredZone]);
   
   // Handle window resize
   useEffect(() => {
@@ -161,20 +401,9 @@ export const MapboxZoneSelector = React.memo(forwardRef<
     return () => window.removeEventListener('resize', handleResize);
   }, [map]);
   
-  // Update selection change callback and ref
-  useEffect(() => {
-    selectedZonesRef.current = selectedZones;
-    
-    if (!onSelectionChange) return;
-    
-    const zones = Array.from(selectedZones.values());
-    const coordinates = zones.map(z => z.coordinates);
-    onSelectionChange(zones, coordinates);
-  }, [selectedZones, onSelectionChange]);
-  
   // Imperative methods
-  const selectZone = useCallback((zoneId: string) => {
-    // Create a mock zone for now
+  const selectZoneById = useCallback((zoneId: string) => {
+    // In a real implementation, you'd look up the zone from your data source
     const zone: Zone = {
       id: zoneId,
       name: `Zone ${zoneId}`,
@@ -182,28 +411,15 @@ export const MapboxZoneSelector = React.memo(forwardRef<
       properties: {},
     };
     
-    if (multiSelect) {
-      const newSelection = new Map(selectedZonesRef.current).set(zoneId, zone);
-      selectedZonesRef.current = newSelection;
-      setSelectedZones(newSelection);
-    } else {
-      const newSelection = new Map([[zoneId, zone]]);
-      selectedZonesRef.current = newSelection;
-      setSelectedZones(newSelection);
-    }
-  }, [multiSelect]);
+    selectZone(zone);
+  }, [selectZone]);
   
-  const clearSelection = useCallback(() => {
-    selectedZonesRef.current = new Map();
-    setSelectedZones(new Map());
-  }, []);
-  
-  const getSelectedZones = useCallback((): Zone[] => {
-    return Array.from(selectedZonesRef.current.values());
-  }, []);
+  const getSelectedZonesMethod = useCallback((): Zone[] => {
+    return selectedZones;
+  }, [selectedZones]);
   
   const exportSelection = useCallback((format: 'geojson' | 'kml' | 'csv') => {
-    const zones = Array.from(selectedZonesRef.current.values());
+    const zones = selectedZones;
     
     switch (format) {
       case 'geojson':
@@ -248,16 +464,16 @@ export const MapboxZoneSelector = React.memo(forwardRef<
       default:
         return '';
     }
-  }, []);
+  }, [selectedZones]);
   
   // Expose methods via ref
   useImperativeHandle(ref, () => ({
     getMap: () => map,
-    selectZone,
+    selectZone: selectZoneById,
     clearSelection,
-    getSelectedZones,
+    getSelectedZones: getSelectedZonesMethod,
     exportSelection,
-  }), [map, selectZone, clearSelection, getSelectedZones, exportSelection]);
+  }), [map, selectZoneById, clearSelection, getSelectedZonesMethod, exportSelection]);
   
   // Handle keyboard navigation
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -281,17 +497,23 @@ export const MapboxZoneSelector = React.memo(forwardRef<
         // Simulate selection at center
         const center = map.getCenter();
         const point = map.project(center);
-        handleMapClick({
-          lngLat: center,
-          point,
-          originalEvent: new MouseEvent('click'),
-          target: map,
-          type: 'click',
-        } as MapMouseEvent);
+        const features = map.queryRenderedFeatures(point, {
+          layers: ['zones-fill']
+        });
+        
+        if (features.length > 0) {
+          handleZoneClick({
+            lngLat: center,
+            point,
+            originalEvent: new MouseEvent('click'),
+            target: map,
+            type: 'click',
+          } as MapMouseEvent);
+        }
         break;
       }
     }
-  }, [map, handleMapClick]);
+  }, [map, handleZoneClick]);
   
   // Apply theme styles
   const getThemeStyles = useCallback((): React.CSSProperties => {
