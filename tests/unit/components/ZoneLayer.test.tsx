@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ZoneLayer } from '../ZoneLayer';
-import type { Zone } from '../../types';
+import { ZoneLayer } from '@/components/ZoneLayer';
+import type { Zone } from '@/types';
 import type { Map as MapboxMap } from 'mapbox-gl';
 
 // Mock mapbox-gl

@@ -51,19 +51,24 @@ jest.mock('mapbox-gl', () => ({
   supported: jest.fn(() => true),
 }));
 
-// Mock mapbox-gl-draw
-jest.mock('@mapbox/mapbox-gl-draw', () => {
-  return jest.fn(() => ({
-    add: jest.fn(),
-    delete: jest.fn(),
-    deleteAll: jest.fn(),
-    set: jest.fn(),
-    get: jest.fn(),
-    getAll: jest.fn(),
-    getMode: jest.fn(),
-    changeMode: jest.fn(),
-    setFeatureProperty: jest.fn(),
-  }));
+// Mock leaflet-draw
+jest.mock('leaflet-draw', () => {
+  return {
+    Draw: jest.fn(() => ({
+      enable: jest.fn(),
+      disable: jest.fn(),
+      addHooks: jest.fn(),
+      removeHooks: jest.fn(),
+      setOptions: jest.fn(),
+    })),
+    drawLocal: {
+      draw: {
+        toolbar: {
+          buttons: {},
+        },
+      },
+    },
+  };
 });
 
 // Add custom matchers or global test utilities here if needed

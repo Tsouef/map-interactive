@@ -71,7 +71,19 @@ export const MapboxZoneSelector = React.memo(forwardRef<
     multiSelect,
     maxSelections,
     onSelectionChange: useCallback((zones: Zone[]) => {
-      const coordinates = zones.map(z => z.coordinates);
+      const coordinates: Coordinates[][][] = [];
+      zones.forEach(z => {
+        // Check if it's a Polygon or MultiPolygon
+        const firstCoord = z.coordinates[0];
+        if (firstCoord && Array.isArray(firstCoord[0]) && typeof firstCoord[0][0] === 'number') {
+          // It's a Polygon (Coordinates[][])
+          coordinates.push(z.coordinates as Coordinates[][]);
+        } else {
+          // It's already a MultiPolygon (Coordinates[][][])
+          const multiPolygon = z.coordinates as Coordinates[][][];
+          coordinates.push(...multiPolygon);
+        }
+      });
       onSelectionChange?.(zones, coordinates);
     }, [onSelectionChange])
   });

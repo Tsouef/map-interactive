@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
-import { MapboxZoneSelector } from '../MapboxZoneSelector';
+import { MapboxZoneSelector } from '@/components/MapboxZoneSelector';
 import mapboxgl from 'mapbox-gl';
-import type { MapboxZoneSelectorRef } from '../../types';
+import type { MapboxZoneSelectorRef } from '@/types';
 
 describe('MapboxZoneSelector Zone Selection Integration', () => {
   const mockMapboxToken = 'test-token-123';

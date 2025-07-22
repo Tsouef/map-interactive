@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { MapboxZoneSelector } from '../MapboxZoneSelector';
-import type { MapboxZoneSelectorRef } from '../../types';
+import { MapboxZoneSelector } from '@/components/MapboxZoneSelector';
+import type { MapboxZoneSelectorRef } from '@/types';
 import mapboxgl from 'mapbox-gl';
 
 // Mock mapbox-gl is already set up in tests/setup.ts

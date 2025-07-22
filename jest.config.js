@@ -5,6 +5,10 @@ export default {
   moduleNameMapper: {
     '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^leaflet$': '<rootDir>/__mocks__/leaflet.ts',
+    '^react-leaflet$': '<rootDir>/__mocks__/react-leaflet.tsx',
+    '^@react-leaflet/core$': '<rootDir>/__mocks__/react-leaflet-core.ts',
+    '^mapbox-gl$': '<rootDir>/__mocks__/mapbox-gl.ts',
   },
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
   testMatch: [
