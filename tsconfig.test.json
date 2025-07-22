@@ -1,13 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "types": ["@testing-library/jest-dom", "jest"],
-    "esModuleInterop": true,
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "types": ["jest", "@testing-library/jest-dom"],
+    "noEmit": true
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "jest.setup.ts"],
+  "exclude": ["node_modules", "dist"]
 }
