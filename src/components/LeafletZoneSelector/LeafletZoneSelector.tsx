@@ -10,6 +10,7 @@ import { LoadingOverlay } from '../LoadingOverlay';
 import { ErrorBoundary } from '../ErrorBoundary';
 import { exportToFormat } from '@/utils/exportFormats';
 import { calculateMetrics } from '@/utils/metrics';
+import { appZoneToLayerZone, layerZoneToAppZone } from '@/utils/zoneTransformers';
 import type { Zone } from '@/types';
 import type { LeafletZoneSelectorProps, LeafletZoneSelectorRef } from './types';
 import 'leaflet/dist/leaflet.css';
@@ -174,22 +175,23 @@ export const LeafletZoneSelector = forwardRef<
         
         {zones && zones.length > 0 && (
           <ZoneLayer
-            zones={zones}
+            zones={zones.map(appZoneToLayerZone)}
             selectedZoneIds={selectedZones.map(z => z.id)}
             hoveredZoneId={hoveredZone?.id}
             onZoneClick={(zone, event) => {
-              if (isZoneSelected(zone.id)) {
-                deselectZone(zone.id);
+              const appZone = layerZoneToAppZone(zone);
+              if (isZoneSelected(appZone.id)) {
+                deselectZone(appZone.id);
               } else {
-                selectZone(zone);
+                selectZone(appZone);
               }
-              onZoneClick?.(zone, event);
+              onZoneClick?.(appZone, event);
             }}
             onZoneHover={(zone) => {
-              setHoveredZone(zone);
-              onZoneHover?.(zone);
+              const appZone = zone ? layerZoneToAppZone(zone) : null;
+              setHoveredZone(appZone);
+              onZoneHover?.(appZone);
             }}
-            theme={theme}
           />
         )}
         
