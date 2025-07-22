@@ -48,15 +48,20 @@ describe('ZoneLayer', () => {
       addLayer: jest.fn(),
       removeLayer: jest.fn(),
       removeSource: jest.fn(),
-      getSource: jest.fn().mockReturnValue(mockSource),
-      getLayer: jest.fn(),
+      getSource: jest.fn().mockReturnValue(null), // Initially no source
+      getLayer: jest.fn().mockReturnValue(null), // Initially no layers
       setFeatureState: jest.fn(),
       removeFeatureState: jest.fn(),
       on: jest.fn(),
       off: jest.fn(),
       isStyleLoaded: jest.fn().mockReturnValue(true),
       loaded: jest.fn().mockReturnValue(true),
-      queryRenderedFeatures: jest.fn().mockReturnValue([])
+      queryRenderedFeatures: jest.fn().mockReturnValue([]),
+      getCanvas: jest.fn().mockReturnValue({ style: {} }),
+      getBounds: jest.fn().mockReturnValue({
+        getNorthEast: () => ({ lat: 48.9, lng: 2.4 }),
+        getSouthWest: () => ({ lat: 48.8, lng: 2.3 })
+      })
     };
   });
 
@@ -88,6 +93,9 @@ describe('ZoneLayer', () => {
         />
       );
 
+      // Wait for useEffect to run
+      expect(mockMap.isStyleLoaded).toHaveBeenCalled();
+      expect(mockMap.getSource).toHaveBeenCalledWith('zones');
       expect(mockMap.addSource).toHaveBeenCalledWith('zones', {
         type: 'geojson',
         data: expect.any(Object)
@@ -107,6 +115,20 @@ describe('ZoneLayer', () => {
     });
 
     it('should clean up on unmount', () => {
+      // Mock that layers exist when checking
+      mockMap.getLayer.mockImplementation((id) => {
+        if (id === 'zones-fill' || id === 'zones-border') {
+          return { id }; // Return layer object
+        }
+        return null;
+      });
+      mockMap.getSource.mockImplementation((id) => {
+        if (id === 'zones') {
+          return mockSource; // Return source object
+        }
+        return null;
+      });
+      
       const { unmount } = render(
         <ZoneLayer
           map={mockMap}
@@ -140,9 +162,14 @@ describe('ZoneLayer', () => {
       expect(sourceData.features).toHaveLength(2);
       expect(sourceData.features[0].properties.id).toBe('zone-1');
       expect(sourceData.features[1].properties.id).toBe('zone-2');
+      // Check geometry type is Polygon for simple zones
+      expect(sourceData.features[0].geometry.type).toBe('Polygon');
     });
 
     it('should update data when zones change', () => {
+      // After initial render, getSource should return the mockSource
+      mockMap.getSource.mockReturnValue(mockSource);
+      
       const { rerender } = render(
         <ZoneLayer
           map={mockMap}
@@ -152,7 +179,7 @@ describe('ZoneLayer', () => {
         />
       );
 
-      const newZones = [...mockZones, {
+      const newZones: Zone[] = [...mockZones, {
         id: 'zone-3',
         name: 'Zone 3',
         coordinates: [[
@@ -177,7 +204,7 @@ describe('ZoneLayer', () => {
       expect(mockSource.setData).toHaveBeenCalledWith(expect.objectContaining({
         type: 'FeatureCollection',
         features: expect.arrayContaining([
-          expect.objectContaining({ properties: { id: 'zone-3' } })
+          expect.objectContaining({ properties: expect.objectContaining({ id: 'zone-3' }) })
         ])
       }));
     });
@@ -369,12 +396,37 @@ describe('ZoneLayer', () => {
       );
 
       const fillLayer = mockMap.addLayer.mock.calls.find(call => call[0].id === 'zones-fill')?.[0];
-      expect(fillLayer.paint['fill-color']).toBe('#ff0000');
-      expect(fillLayer.paint['fill-opacity']).toContain(0.5);
+      // Check that custom colors are used in the data-driven expression
+      expect(fillLayer.paint['fill-color']).toEqual(expect.arrayContaining([
+        'case',
+        expect.anything(),
+        '#0000ff', // selectedFillColor
+        '#ff0000'  // fillColor
+      ]));
+      expect(fillLayer.paint['fill-opacity']).toEqual(expect.arrayContaining([
+        'case',
+        expect.anything(),
+        0.6,  // hoverFillOpacity
+        expect.anything(),
+        0.8,  // selectedFillOpacity
+        0.5   // fillOpacity
+      ]));
       
       const lineLayer = mockMap.addLayer.mock.calls.find(call => call[0].id === 'zones-border')?.[0];
-      expect(lineLayer.paint['line-color']).toBe('#00ff00');
-      expect(lineLayer.paint['line-width']).toBe(2);
+      expect(lineLayer.paint['line-color']).toEqual(expect.arrayContaining([
+        'case',
+        expect.anything(),
+        '#1e293b', // Default selectedStrokeColor
+        '#00ff00'  // strokeColor
+      ]));
+      expect(lineLayer.paint['line-width']).toEqual(expect.arrayContaining([
+        'case',
+        expect.anything(),
+        2, // Default hoverStrokeWidth
+        expect.anything(),
+        2, // Default selectedStrokeWidth
+        2  // strokeWidth
+      ]));
     });
 
     it('should use data-driven styling for states', () => {
@@ -403,7 +455,7 @@ describe('ZoneLayer', () => {
 
   describe('Performance', () => {
     it('should handle large numbers of zones efficiently', () => {
-      const largeZoneSet = Array.from({ length: 10000 }, (_, i) => ({
+      const largeZoneSet: Zone[] = Array.from({ length: 10000 }, (_, i) => ({
         id: `zone-${i}`,
         name: `Zone ${i}`,
         coordinates: [[
@@ -413,7 +465,7 @@ describe('ZoneLayer', () => {
           [2.3522 + (i * 0.001), 48.8666],
           [2.3522 + (i * 0.001), 48.8566]
         ]],
-        properties: { postalCode: `750${String(i).padStart(2, '0')}` }
+        properties: { postalCode: `750${i < 10 ? '0' + i : i}` }
       }));
 
       const { container } = render(
