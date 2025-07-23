@@ -22,45 +22,26 @@ describe('osmUtils', () => {
 
   describe('fetchCityBoundary', () => {
     it('should fetch city boundary from Overpass API', async () => {
-      const mockOverpassResponse = {
-        elements: [{
-          type: 'relation',
-          id: 123456,
-          tags: {
-            name: 'Paris',
-            admin_level: '8',
-            boundary: 'administrative'
+      const mockNominatimResponse = {
+        features: [{
+          properties: {
+            place_id: 123456,
+            osm_type: 'relation',
+            osm_id: 123456,
+            display_name: 'Paris, France',
+            boundingbox: ['48.815', '48.902', '2.224', '2.469']
           },
-          members: [],
-          bounds: {
-            minlat: 48.815,
-            minlon: 2.224,
-            maxlat: 48.902,
-            maxlon: 2.469
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[[2.224, 48.815], [2.469, 48.815], [2.469, 48.902], [2.224, 48.902], [2.224, 48.815]]]
           }
         }]
       };
-
-      const mockNominatimResponse = [{
-        place_id: 123456,
-        osm_type: 'relation',
-        osm_id: 123456,
-        boundingbox: ['48.815', '48.902', '2.224', '2.469'],
-        display_name: 'Paris, France',
-        geojson: {
-          type: 'Polygon',
-          coordinates: [[[2.224, 48.815], [2.469, 48.815], [2.469, 48.902], [2.224, 48.902], [2.224, 48.815]]]
-        }
-      }];
 
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: true,
           json: async () => mockNominatimResponse
-        })
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockOverpassResponse
         });
 
       const zone = await fetchCityBoundary('Paris');
@@ -78,7 +59,7 @@ describe('osmUtils', () => {
       });
 
       // Check that fetch was called with correct parameters
-      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('nominatim.openstreetmap.org'),
         expect.objectContaining({
@@ -92,7 +73,7 @@ describe('osmUtils', () => {
     it('should handle city not found', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => []
+        json: async () => ({ features: [] })
       });
 
       await expect(fetchCityBoundary('NonexistentCity')).rejects.toThrow('City not found');
@@ -105,14 +86,19 @@ describe('osmUtils', () => {
     });
 
     it('should use cache for repeated requests', async () => {
-      const mockResponse = [{
-        place_id: 123456,
-        display_name: 'Paris, France',
-        geojson: {
-          type: 'Polygon',
-          coordinates: [[[2.224, 48.815], [2.469, 48.815], [2.469, 48.902], [2.224, 48.902], [2.224, 48.815]]]
-        }
-      }];
+      const mockResponse = {
+        features: [{
+          properties: {
+            place_id: 123456,
+            display_name: 'Paris, France',
+            boundingbox: ['48.815', '48.902', '2.224', '2.469']
+          },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[[2.224, 48.815], [2.469, 48.815], [2.469, 48.902], [2.224, 48.902], [2.224, 48.815]]]
+          }
+        }]
+      };
 
       (global.fetch as jest.Mock).mockResolvedValue({
         ok: true,
@@ -131,22 +117,36 @@ describe('osmUtils', () => {
 
   describe('searchLocation', () => {
     it('should search locations using Nominatim', async () => {
-      const mockResponse = [
-        {
-          place_id: 1,
-          display_name: '75001 Paris, France',
-          lat: '48.860',
-          lon: '2.340',
-          boundingbox: ['48.855', '48.865', '2.335', '2.345']
-        },
-        {
-          place_id: 2,
-          display_name: '75002 Paris, France',
-          lat: '48.865',
-          lon: '2.345',
-          boundingbox: ['48.860', '48.870', '2.340', '2.350']
-        }
-      ];
+      const mockResponse = {
+        features: [
+          {
+            properties: {
+              place_id: 1,
+              display_name: '75001 Paris, France',
+              lat: '48.860',
+              lon: '2.340',
+              boundingbox: ['48.855', '48.865', '2.335', '2.345']
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [2.340, 48.860]
+            }
+          },
+          {
+            properties: {
+              place_id: 2,
+              display_name: '75002 Paris, France',
+              lat: '48.865',
+              lon: '2.345',
+              boundingbox: ['48.860', '48.870', '2.340', '2.350']
+            },
+            geometry: {
+              type: 'Point',
+              coordinates: [2.345, 48.865]
+            }
+          }
+        ]
+      };
 
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
@@ -167,7 +167,7 @@ describe('osmUtils', () => {
     it('should handle empty search results', async () => {
       (global.fetch as jest.Mock).mockResolvedValueOnce({
         ok: true,
-        json: async () => []
+        json: async () => ({ features: [] })
       });
 
       const results = await searchLocation('xyz123');
@@ -201,6 +201,21 @@ describe('osmUtils', () => {
 
   describe('fetchDistrictBoundaries', () => {
     it('should fetch district boundaries for a city', async () => {
+      // Mock city boundary fetch first
+      const mockCityResponse = {
+        features: [{
+          properties: {
+            place_id: 123456,
+            display_name: 'Paris, France',
+            boundingbox: ['48.815', '48.902', '2.224', '2.469']
+          },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[[2.224, 48.815], [2.469, 48.815], [2.469, 48.902], [2.224, 48.902], [2.224, 48.815]]]
+          }
+        }]
+      };
+
       const mockOverpassResponse = {
         elements: [
           {
@@ -237,31 +252,41 @@ describe('osmUtils', () => {
       // Mock Nominatim for fetching geometries
       const mockNominatimResponses = [
         {
-          geojson: {
-            type: 'Polygon',
-            coordinates: [[[2.330, 48.855], [2.350, 48.855], [2.350, 48.867], [2.330, 48.867], [2.330, 48.855]]]
-          }
+          features: [{
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: [[[2.330, 48.855], [2.350, 48.855], [2.350, 48.867], [2.330, 48.867], [2.330, 48.855]]]
+            }
+          }]
         },
         {
-          geojson: {
-            type: 'Polygon',
-            coordinates: [[[2.340, 48.863], [2.355, 48.863], [2.355, 48.870], [2.340, 48.870], [2.340, 48.863]]]
-          }
+          features: [{
+            properties: {},
+            geometry: {
+              type: 'Polygon',
+              coordinates: [[[2.340, 48.863], [2.355, 48.863], [2.355, 48.870], [2.340, 48.870], [2.340, 48.863]]]
+            }
+          }]
         }
       ];
 
       (global.fetch as jest.Mock)
         .mockResolvedValueOnce({
           ok: true,
+          json: async () => mockCityResponse
+        })
+        .mockResolvedValueOnce({
+          ok: true,
           json: async () => mockOverpassResponse
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => [mockNominatimResponses[0]]
+          json: async () => mockNominatimResponses[0]
         })
         .mockResolvedValueOnce({
           ok: true,
-          json: async () => [mockNominatimResponses[1]]
+          json: async () => mockNominatimResponses[1]
         });
 
       const districts = await fetchDistrictBoundaries('Paris', 'France');
@@ -401,21 +426,21 @@ describe('osmUtils', () => {
         json: async () => []
       });
 
-      await nominatimSearch({ q: 'Paris', limit: 5 });
+      await nominatimSearch({ q: 'Paris', limit: 5, format: 'geojson' });
       
       const [url] = (global.fetch as jest.Mock).mock.calls[0];
-      expect(url).toContain('format=geojson');
       expect(url).toContain('q=Paris');
       expect(url).toContain('limit=5');
+      expect(url).toContain('format=geojson');
       expect(url).toContain('polygon_geojson=1');
     });
 
     it('should handle rate limit errors', async () => {
-      (global.fetch as jest.Mock).mockResolvedValueOnce({
+      (global.fetch as jest.Mock).mockImplementationOnce(async () => ({
         ok: false,
         status: 429,
         statusText: 'Too Many Requests'
-      });
+      }));
 
       await expect(nominatimSearch({ q: 'Test' }))
         .rejects.toThrow('Rate limit exceeded');
