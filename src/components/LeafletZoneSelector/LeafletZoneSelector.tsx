@@ -1,4 +1,5 @@
 import { forwardRef, useImperativeHandle, useRef, useState, useEffect } from "react";
+import ReactDOM from "react-dom/client";
 import L from "leaflet";
 import { useZoneSelection } from "@/hooks/useZoneSelection";
 import { SearchInput } from "../SearchInput";
@@ -76,6 +77,7 @@ export const LeafletZoneSelector = forwardRef<LeafletZoneSelectorRef, LeafletZon
     const containerRef = useRef<HTMLDivElement>(null);
     const mapRef = useRef<L.Map | null>(null);
     const zonesLayerRef = useRef<L.LayerGroup | null>(null);
+    const searchControlRef = useRef<L.Control | null>(null);
     const [zones, setZones] = useState<Zone[]>(initialZones || []);
     const [loading, setLoading] = useState(false);
     const [, setError] = useState<Error | null>(null);
@@ -133,6 +135,22 @@ export const LeafletZoneSelector = forwardRef<LeafletZoneSelectorRef, LeafletZon
       // Create zones layer group
       const zonesLayer = L.layerGroup().addTo(map);
 
+      // Add search control if enabled
+      if (enableSearch) {
+        const SearchControlClass = L.Control.extend({
+          onAdd: function() {
+            const div = L.DomUtil.create('div', 'leaflet-search-control-wrapper');
+            L.DomEvent.disableClickPropagation(div);
+            L.DomEvent.disableScrollPropagation(div);
+            return div;
+          }
+        });
+        
+        const searchControl = new SearchControlClass({ position: 'topright' });
+        searchControl.addTo(map);
+        searchControlRef.current = searchControl;
+      }
+
       mapRef.current = map;
       zonesLayerRef.current = zonesLayer;
 
@@ -145,6 +163,7 @@ export const LeafletZoneSelector = forwardRef<LeafletZoneSelectorRef, LeafletZon
             mapRef.current.remove();
             mapRef.current = null;
             zonesLayerRef.current = null;
+            searchControlRef.current = null;
           } catch {
             // Ignore cleanup errors
           }
@@ -152,6 +171,30 @@ export const LeafletZoneSelector = forwardRef<LeafletZoneSelectorRef, LeafletZon
       };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); // Only run once
+
+    // Render search control
+    useEffect(() => {
+      if (!mapRef.current || !searchControlRef.current || !enableSearch) return;
+      
+      const container = searchControlRef.current.getContainer();
+      if (!container) return;
+      
+      const root = ReactDOM.createRoot(container);
+      root.render(
+        <SearchInput
+          position="topright"
+          onLocationSelect={(location) => {
+            const lat = parseFloat(location.lat);
+            const lon = parseFloat(location.lon);
+            mapRef.current?.setView([lat, lon], 14);
+          }}
+        />
+      );
+      
+      return () => {
+        root.unmount();
+      };
+    }, [enableSearch]);
 
     // Update zones on map
     useEffect(() => {
@@ -306,15 +349,6 @@ export const LeafletZoneSelector = forwardRef<LeafletZoneSelectorRef, LeafletZon
         style={containerStyle}
         role="application"
       >
-        {enableSearch && mapRef.current && (
-          <SearchInput
-            onLocationSelect={(location) => {
-              const lat = parseFloat(location.lat);
-              const lon = parseFloat(location.lon);
-              mapRef.current?.setView([lat, lon], 14);
-            }}
-          />
-        )}
         <div ref={containerRef} className="leaflet-zone-selector__map" style={{ width: "100%", height: "100%" }} />
 
         {loading && <LoadingOverlay />}

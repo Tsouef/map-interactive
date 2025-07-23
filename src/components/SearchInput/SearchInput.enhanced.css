@@ -1,9 +1,9 @@
 /* Enhanced Leaflet Search Control */
 .leaflet-search-control {
-  position: absolute;
-  z-index: 1000;
-  width: 360px;
-  max-width: calc(100% - 40px);
+  position: absolute !important;
+  z-index: 1000 !important;
+  width: 360px !important;
+  max-width: calc(100% - 40px) !important;
 }
 
 .leaflet-search-topright {
