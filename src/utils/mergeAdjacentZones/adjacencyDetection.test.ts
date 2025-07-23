@@ -37,13 +37,14 @@ describe('detectAdjacency', () => {
 
     it('should detect zones with small gaps within tolerance', () => {
       const zone1 = createZone('A', [
-        [0, 0], [0.999, 0], [0.999, 1], [0, 1], [0, 0]
+        [0, 0], [0.9999999, 0], [0.9999999, 1], [0, 1], [0, 0]
       ]);
       const zone2 = createZone('B', [
-        [1.001, 0], [2, 0], [2, 1], [1.001, 1], [1.001, 0]
+        [1.0000001, 0], [2, 0], [2, 1], [1.0000001, 1], [1.0000001, 0]
       ]);
       
-      // With default tolerance of 0.1 meters
+      // Gap is ~0.0000002 degrees (~0.02 meters at equator)
+      // With default tolerance of 0.1 meters, should be detected
       expect(detectAdjacency(zone1, zone2)).toBe(true);
     });
 
