@@ -1,19 +1,19 @@
 import { renderHook, act } from '@testing-library/react';
 import { useZoneSelection } from '../useZoneSelection';
 import { createMockZone } from '@/test-utils/mockZones';
-import type { Zone, SelectionChangeEvent, SelectionError } from '../types';
+import type { Zone } from '@/types';
 
 describe('useZoneSelection', () => {
   let mockZones: Zone[];
 
   beforeEach(() => {
-    // Create mock zones
+    // Create mock zones with proper coordinates
     mockZones = [
-      createMockZone('zone-1', { name: 'Zone 1' }),
-      createMockZone('zone-2', { name: 'Zone 2' }),
-      createMockZone('zone-3', { name: 'Zone 3' }),
-      createMockZone('zone-4', { name: 'Zone 4' }),
-      createMockZone('zone-5', { name: 'Zone 5' })
+      createMockZone('zone-1', [[0, 0], [0, 1], [1, 1], [1, 0]], 'Zone 1'),
+      createMockZone('zone-2', [[1, 0], [1, 1], [2, 1], [2, 0]], 'Zone 2'),
+      createMockZone('zone-3', [[2, 0], [2, 1], [3, 1], [3, 0]], 'Zone 3'),
+      createMockZone('zone-4', [[0, 1], [0, 2], [1, 2], [1, 1]], 'Zone 4'),
+      createMockZone('zone-5', [[1, 1], [1, 2], [2, 2], [2, 1]], 'Zone 5')
     ];
   });
 
@@ -237,18 +237,23 @@ describe('useZoneSelection', () => {
         useZoneSelection(mockZones, { enableHistory: true })
       );
 
-      // Make some selections
+      // Initial state
+      expect(result.current.selectedZones).toHaveLength(0);
+
+      // Make first selection
       act(() => {
         result.current.selectZone('zone-1');
       });
+      expect(result.current.selectedZones).toHaveLength(1);
+      
+      // Make second selection
       act(() => {
         result.current.selectZone('zone-2');
       });
-
       expect(result.current.selectedZones).toHaveLength(2);
       expect(result.current.canUndo).toBe(true);
 
-      // Undo last selection
+      // Undo last selection - should go back to having just zone-1
       act(() => {
         result.current.undo();
       });
@@ -256,6 +261,14 @@ describe('useZoneSelection', () => {
       expect(result.current.selectedZones).toHaveLength(1);
       expect(result.current.isZoneSelected('zone-1')).toBe(true);
       expect(result.current.isZoneSelected('zone-2')).toBe(false);
+      
+      // Undo again - should go back to empty
+      act(() => {
+        result.current.undo();
+      });
+      
+      expect(result.current.selectedZones).toHaveLength(0);
+      expect(result.current.canUndo).toBe(false);
     });
 
     it('should redo selection changes', () => {
