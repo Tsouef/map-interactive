@@ -8,6 +8,7 @@ import { useLocalStorage } from '@/hooks/useLocalStorage';
 import type { SearchInputProps, SearchResult, NominatimResult } from './types';
 import './SearchInput.css';
 import './SearchInput.theme.css';
+import './SearchInput.leaflet-fix.css';
 
 const DEFAULT_GEOCODER = new NominatimGeocoder();
 

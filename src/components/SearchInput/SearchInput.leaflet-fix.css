@@ -1,0 +1,25 @@
+/* Leaflet control fixes */
+.leaflet-control.leaflet-search-control-wrapper {
+  margin: 0 !important;
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.leaflet-search-control-wrapper .leaflet-search-control {
+  position: relative !important;
+  width: 300px !important;
+}
+
+/* Prevent Leaflet default control styles */
+.leaflet-top.leaflet-right .leaflet-search-control-wrapper {
+  margin-top: 0;
+  margin-right: 0;
+}
+
+/* Fix for mobile */
+@media (max-width: 640px) {
+  .leaflet-search-control-wrapper .leaflet-search-control {
+    width: calc(100vw - 40px) !important;
+  }
+}

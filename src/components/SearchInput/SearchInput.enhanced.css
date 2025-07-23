@@ -2,7 +2,7 @@
 .leaflet-search-control {
   position: absolute !important;
   z-index: 1000 !important;
-  width: 360px !important;
+  width: 300px !important;
   max-width: calc(100% - 40px) !important;
 }
 
@@ -40,26 +40,24 @@
     0 1px 2px rgba(0, 0, 0, 0.04),
     0 4px 8px rgba(0, 0, 0, 0.04),
     0 12px 24px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
 }
 
 .leaflet-search-input-wrapper:hover {
   box-shadow: 
     0 1px 2px rgba(0, 0, 0, 0.06),
-    0 6px 12px rgba(0, 0, 0, 0.06),
-    0 16px 32px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 .leaflet-search-input-wrapper:has(.leaflet-search-input:focus) {
   background: rgba(255, 255, 255, 1);
   border-color: #0066cc;
   box-shadow: 
-    0 0 0 3px rgba(0, 102, 204, 0.1),
+    0 0 0 2px rgba(0, 102, 204, 0.15),
     0 1px 2px rgba(0, 0, 0, 0.06),
-    0 8px 16px rgba(0, 0, 0, 0.08),
-    0 20px 40px rgba(0, 0, 0, 0.12);
+    0 4px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* Search Icon */
@@ -86,14 +84,15 @@
 .leaflet-search-input {
   flex: 1;
   border: none;
-  padding: 14px 44px;
-  font-size: 15px;
+  padding: 10px 40px;
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.5;
   color: #1f2937;
   outline: none;
   background: transparent;
-  min-height: 48px;
+  min-height: 40px;
+  height: 40px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -171,27 +170,27 @@
 /* Modern Dropdown */
 .leaflet-search-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 4px);
   left: 0;
   right: 0;
   background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.04),
-    0 10px 15px rgba(0, 0, 0, 0.06),
-    0 20px 40px rgba(0, 0, 0, 0.1);
-  max-height: 320px;
+    0 2px 4px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.06),
+    0 8px 16px rgba(0, 0, 0, 0.08);
+  max-height: 280px;
   overflow: hidden;
-  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideDown 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   transform-origin: top center;
 }
 
 .leaflet-search-dropdown-inner {
   overflow-y: auto;
-  max-height: 320px;
+  max-height: 280px;
   overscroll-behavior: contain;
 }
 
@@ -216,11 +215,11 @@
 @keyframes slideDown {
   from {
     opacity: 0;
-    transform: translateY(-8px) scale(0.98);
+    transform: translateY(-4px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
@@ -242,13 +241,14 @@
 /* Modern Suggestions */
 .leaflet-search-suggestion {
   display: flex;
-  align-items: flex-start;
-  padding: 12px 16px;
+  align-items: center;
+  padding: 10px 12px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   position: relative;
   overflow: hidden;
+  min-height: 44px;
 }
 
 .leaflet-search-suggestion::before {
@@ -462,9 +462,7 @@
 
 /* Focus visible for accessibility */
 .leaflet-search-input:focus-visible {
-  outline: 2px solid #0066cc;
-  outline-offset: -2px;
-  border-radius: 12px;
+  outline: none;
 }
 
 .leaflet-search-clear:focus-visible {
