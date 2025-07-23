@@ -1,0 +1,294 @@
+/* Modern Theme System for SearchInput */
+
+/* CSS Variables for theming */
+.leaflet-search-control {
+  --search-primary-color: #3b82f6;
+  --search-primary-hover: #2563eb;
+  --search-primary-focus: #1d4ed8;
+  
+  --search-background: #ffffff;
+  --search-surface: #f8fafc;
+  --search-text-color: #1f2937;
+  --search-text-muted: #6b7280;
+  --search-text-light: #9ca3af;
+  
+  --search-border-color: #e5e7eb;
+  --search-border-hover: #d1d5db;
+  --search-border-focus: var(--search-primary-color);
+  
+  --search-border-radius: 8px;
+  --search-border-radius-lg: 12px;
+  
+  --search-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 12px -4px rgba(0, 0, 0, 0.12);
+  --search-shadow-lg: 0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 12px 24px -8px rgba(0, 0, 0, 0.15);
+  --search-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  
+  --search-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --search-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --search-spacing-xs: 4px;
+  --search-spacing-sm: 8px;
+  --search-spacing-md: 12px;
+  --search-spacing-lg: 16px;
+  
+  --search-font-size: 15px;
+  --search-font-size-sm: 13px;
+  --search-font-size-xs: 12px;
+  
+  --search-line-height: 1.5;
+  --search-icon-size: 18px;
+}
+
+/* Theme Variants */
+.leaflet-search-theme-modern {
+  --search-primary-color: #3b82f6;
+  --search-border-radius: 8px;
+  --search-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 4px 12px -4px rgba(0, 0, 0, 0.12);
+}
+
+.leaflet-search-theme-minimal {
+  --search-primary-color: #64748b;
+  --search-background: #fafafa;
+  --search-border-radius: 4px;
+  --search-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-search-theme-glass {
+  --search-background: rgba(255, 255, 255, 0.8);
+  --search-surface: rgba(248, 250, 252, 0.8);
+  --search-border-color: rgba(229, 231, 235, 0.6);
+  --search-shadow: 0 4px 24px -12px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+}
+
+/* Enhanced Search Control */
+.leaflet-search-control {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--search-font-size);
+  line-height: var(--search-line-height);
+  color: var(--search-text-color);
+}
+
+/* Enhanced Input Wrapper */
+.leaflet-search-input-wrapper {
+  background: var(--search-background);
+  border: 1px solid var(--search-border-color);
+  border-radius: var(--search-border-radius);
+  box-shadow: var(--search-shadow);
+  transition: var(--search-transition);
+  overflow: hidden;
+}
+
+.leaflet-search-input-wrapper:hover {
+  border-color: var(--search-border-hover);
+  box-shadow: var(--search-shadow-lg);
+}
+
+.leaflet-search-input-wrapper:has(.leaflet-search-input:focus) {
+  border-color: var(--search-border-focus);
+  box-shadow: var(--search-shadow-lg), var(--search-shadow-focus);
+}
+
+/* Enhanced Search Input */
+.leaflet-search-input {
+  padding: var(--search-spacing-md) 40px;
+  font-size: var(--search-font-size);
+  line-height: var(--search-line-height);
+  color: var(--search-text-color);
+  height: 44px;
+  transition: var(--search-transition-fast);
+  border-radius: var(--search-border-radius);
+}
+
+.leaflet-search-input::placeholder {
+  color: var(--search-text-light);
+}
+
+.leaflet-search-input:focus {
+  outline: 2px solid var(--search-primary-color);
+  outline-offset: 2px;
+}
+
+/* Enhanced Search Icon */
+.leaflet-search-icon {
+  width: var(--search-icon-size);
+  height: var(--search-icon-size);
+  color: var(--search-text-muted);
+  transition: var(--search-transition-fast);
+}
+
+.leaflet-search-input-wrapper:hover .leaflet-search-icon {
+  color: var(--search-text-color);
+}
+
+/* Enhanced Clear Button */
+.leaflet-search-clear {
+  transition: var(--search-transition-fast);
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  right: 6px;
+}
+
+.leaflet-search-clear:hover {
+  background-color: var(--search-surface);
+  color: var(--search-primary-color);
+  transform: scale(1.1);
+}
+
+.leaflet-search-clear:active {
+  transform: scale(0.95);
+}
+
+/* Enhanced Spinner */
+.leaflet-search-spinner {
+  color: var(--search-primary-color);
+  width: var(--search-icon-size);
+  height: var(--search-icon-size);
+}
+
+/* Enhanced Dropdown */
+.leaflet-search-dropdown {
+  background: var(--search-background);
+  border: 1px solid var(--search-border-color);
+  border-radius: var(--search-border-radius);
+  box-shadow: var(--search-shadow-lg);
+  margin-top: var(--search-spacing-sm);
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Enhanced Dropdown Header */
+.leaflet-search-dropdown-header {
+  padding: var(--search-spacing-sm) var(--search-spacing-md);
+  font-size: var(--search-font-size-xs);
+  font-weight: 600;
+  color: var(--search-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--search-surface);
+}
+
+/* Enhanced Suggestions */
+.leaflet-search-suggestion {
+  padding: var(--search-spacing-md);
+  transition: var(--search-transition-fast);
+  border-bottom: 1px solid var(--search-border-color);
+}
+
+.leaflet-search-suggestion:last-child {
+  border-bottom: none;
+}
+
+.leaflet-search-suggestion:hover {
+  background-color: #eff6ff;
+}
+
+.leaflet-search-suggestion.selected {
+  background-color: #dbeafe;
+}
+
+/* Suggestion Icons */
+.leaflet-search-suggestion-icon {
+  width: var(--search-icon-size);
+  height: var(--search-icon-size);
+  color: var(--search-text-muted);
+}
+
+.leaflet-search-suggestion:hover .leaflet-search-suggestion-icon {
+  color: var(--search-primary-color);
+}
+
+/* Enhanced Text Highlighting */
+.leaflet-search-suggestion-name mark {
+  background-color: #fee140;
+  color: inherit;
+  font-weight: 600;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+/* Dark Mode Enhancements */
+.dark .leaflet-search-control {
+  --search-background: #1f2937;
+  --search-surface: #111827;
+  --search-text-color: #f3f4f6;
+  --search-text-muted: #9ca3af;
+  --search-text-light: #6b7280;
+  
+  --search-border-color: #374151;
+  --search-border-hover: #4b5563;
+  
+  --search-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 8px 24px -4px rgba(0, 0, 0, 0.5);
+  --search-shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.5), 0 16px 32px -8px rgba(0, 0, 0, 0.6);
+  --search-shadow-focus: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.dark .leaflet-search-suggestion:hover {
+  background-color: #374151;
+}
+
+.dark .leaflet-search-suggestion.selected {
+  background-color: #4b5563;
+}
+
+.dark .leaflet-search-suggestion-name mark {
+  background-color: #854d0e;
+  color: #fef3c7;
+}
+
+/* Mobile Enhancements */
+@media (max-width: 640px) {
+  .leaflet-search-control {
+    --search-font-size: 16px; /* Prevent zoom on iOS */
+    --search-spacing-md: 14px;
+  }
+  
+  .leaflet-search-dropdown {
+    position: fixed;
+    left: 10px;
+    right: 10px;
+    top: auto;
+    bottom: 10px;
+    max-height: 60vh;
+    border-radius: var(--search-border-radius-lg);
+  }
+}
+
+/* Focus Visible */
+.leaflet-search-input:focus-visible,
+.leaflet-search-clear:focus-visible,
+.leaflet-search-suggestion:focus-visible {
+  outline: 2px solid var(--search-primary-color);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .leaflet-search-control * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .leaflet-search-control {
+    --search-border-color: currentColor;
+    --search-shadow: none;
+  }
+  
+  .leaflet-search-input-wrapper {
+    border-width: 2px;
+  }
+}

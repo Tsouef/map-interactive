@@ -7,6 +7,7 @@ import { useClickOutside } from '@/hooks/useClickOutside';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import type { SearchInputProps, SearchResult, NominatimResult, GeocodingService } from './types';
 import './SearchInput.css';
+import './SearchInput.theme.css';
 
 const DEFAULT_GEOCODER = new NominatimGeocoder();
 
@@ -26,6 +27,8 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   className,
   inputClassName,
   dropdownClassName,
+  theme = 'modern',
+  customTheme,
   // Legacy props
   onLocationSelect,
   maxResults,
@@ -182,10 +185,24 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   const showClearButton = query.length > 0;
   const showDropdown = isOpen && (suggestions.length > 0 || (enableHistory && !query && recentSearches.length > 0));
   
+  // Build theme classes
+  const themeClasses = theme ? `leaflet-search-theme-${theme}` : '';
+  
+  // Build custom theme styles
+  const customStyles = customTheme ? {
+    '--search-primary-color': customTheme.primaryColor,
+    '--search-background': customTheme.backgroundColor,
+    '--search-text-color': customTheme.textColor,
+    '--search-border-radius': customTheme.borderRadius,
+    '--search-shadow': customTheme.boxShadow,
+    '--search-font-size': customTheme.fontSize,
+  } as React.CSSProperties : undefined;
+  
   return (
     <div 
       ref={containerRef}
-      className={`leaflet-search-control leaflet-search-${position} ${className || ''}`}
+      className={`leaflet-search-control leaflet-search-${position} ${themeClasses} ${className || ''}`}
+      style={customStyles}
     >
       <div className="leaflet-search-input-wrapper">
         <SearchIcon className="leaflet-search-icon" />

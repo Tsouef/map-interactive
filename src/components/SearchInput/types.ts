@@ -35,6 +35,8 @@ export interface SearchInputProps {
   className?: string;
   inputClassName?: string;
   dropdownClassName?: string;
+  theme?: 'modern' | 'minimal' | 'glass';
+  customTheme?: SearchTheme;
   
   /** Legacy compatibility */
   onLocationSelect?: (location: NominatimResult) => void;
@@ -114,4 +116,13 @@ export enum SearchError {
 
 export interface PostalCodePatterns {
   [country: string]: RegExp;
+}
+
+export interface SearchTheme {
+  primaryColor?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  borderRadius?: string;
+  boxShadow?: string;
+  fontSize?: string;
 }
