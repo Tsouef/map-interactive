@@ -1,12 +1,20 @@
 import type { Zone, ExportFormat } from '@/types';
 
+// Temporary type for legacy zone structure
+// TODO: Update this file to use Zone.geometry in Issue #13
+interface LegacyZone extends Omit<Zone, 'geometry'> {
+  coordinates: [number, number][];
+}
+
 // Mock implementation for testing
 export function exportToFormat(zones: Zone[], format: ExportFormat): string | Blob {
+  // TODO: Remove type assertion when updating to use geometry in Issue #13
+  const legacyZones = zones as unknown as LegacyZone[];
   switch (format) {
     case 'geojson': {
       const geojson = {
         type: 'FeatureCollection',
-        features: zones.map(zone => ({
+        features: legacyZones.map(zone => ({
           type: 'Feature',
           properties: {
             id: zone.id,
@@ -34,7 +42,7 @@ export function exportToFormat(zones: Zone[], format: ExportFormat): string | Bl
     case 'csv': {
       // Mock CSV export
       const headers = 'id,name,coordinates\n';
-      const rows = zones.map(zone => 
+      const rows = legacyZones.map(zone => 
         `${zone.id},${zone.name},"${JSON.stringify(zone.coordinates)}"`
       ).join('\n');
       return headers + rows;
@@ -46,9 +54,11 @@ export function exportToFormat(zones: Zone[], format: ExportFormat): string | Bl
 }
 
 export function exportToGeoJSON(zones: Zone[]): object {
+  // TODO: Remove type assertion when updating to use geometry in Issue #13
+  const legacyZones = zones as unknown as LegacyZone[];
   return {
     type: 'FeatureCollection',
-    features: zones.map(zone => ({
+    features: legacyZones.map(zone => ({
       type: 'Feature',
       properties: {
         id: zone.id,
@@ -73,8 +83,10 @@ export function exportToKML(zones: Zone[]): string {
 }
 
 export function exportToCSV(zones: Zone[]): string {
+  // TODO: Remove type assertion when updating to use geometry in Issue #13
+  const legacyZones = zones as unknown as LegacyZone[];
   const headers = 'id,name,coordinates\n';
-  const rows = zones.map(zone => 
+  const rows = legacyZones.map(zone => 
     `${zone.id},${zone.name},"${JSON.stringify(zone.coordinates)}"`
   ).join('\n');
   return headers + rows;
