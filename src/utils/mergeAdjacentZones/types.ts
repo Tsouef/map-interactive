@@ -21,7 +21,7 @@ export interface MergeOptions {
   useSpatialIndex?: boolean;
   
   /** Custom property merger function */
-  propertyMerger?: (zones: Zone[]) => Record<string, any>;
+  propertyMerger?: (zones: Zone[]) => Record<string, unknown>;
 }
 
 /**
@@ -53,7 +53,7 @@ export interface MergedZoneGroup {
   zoneIds: string[];
   
   /** Merged properties */
-  properties: Record<string, any>;
+  properties: Record<string, unknown>;
   
   /** Bounding box */
   bbox: BoundingBox;

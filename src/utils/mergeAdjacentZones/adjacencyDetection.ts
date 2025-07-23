@@ -1,6 +1,6 @@
 import * as turf from '@turf/turf';
 import type { Zone } from '../../types';
-import type { Feature, Polygon, MultiPolygon } from 'geojson';
+import type { Polygon, MultiPolygon } from 'geojson';
 
 /**
  * Detects if two zones are adjacent (share a border)
@@ -220,20 +220,23 @@ function edgesShareSegment(edge1: [number[], number[]], edge2: [number[], number
 /**
  * Validate that a geometry has the required structure
  */
-function isValidGeometry(geometry: any): boolean {
-  if (!geometry || !geometry.type) return false;
+function isValidGeometry(geometry: unknown): boolean {
+  const geo = geometry as { type?: string; coordinates?: unknown };
+  if (!geo || !geo.type) return false;
   
-  if (geometry.type === 'Polygon') {
-    return Array.isArray(geometry.coordinates) && 
-           geometry.coordinates.length > 0 &&
-           Array.isArray(geometry.coordinates[0]) &&
-           geometry.coordinates[0].length >= 4; // Minimum valid polygon
+  if (geo.type === 'Polygon') {
+    const coords = geo.coordinates as unknown[][];
+    return Array.isArray(coords) && 
+           coords.length > 0 &&
+           Array.isArray(coords[0]) &&
+           coords[0].length >= 4; // Minimum valid polygon
   }
   
-  if (geometry.type === 'MultiPolygon') {
-    return Array.isArray(geometry.coordinates) &&
-           geometry.coordinates.length > 0 &&
-           geometry.coordinates.every((polygon: any) =>
+  if (geo.type === 'MultiPolygon') {
+    const coords = geo.coordinates as unknown[][][];
+    return Array.isArray(coords) &&
+           coords.length > 0 &&
+           coords.every((polygon) =>
              Array.isArray(polygon) &&
              polygon.length > 0 &&
              Array.isArray(polygon[0]) &&
