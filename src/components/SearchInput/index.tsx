@@ -146,7 +146,7 @@ export const SearchInputOriginal: React.FC<SearchInputProps> = ({
   
   // Handle result selection
   const handleSelectResult = (result: NominatimResult) => {
-    onLocationSelect(result);
+    onLocationSelect?.(result);
     saveRecentSearch({
       display_name: result.display_name,
       lat: result.lat,

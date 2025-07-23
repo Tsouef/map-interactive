@@ -1,4 +1,5 @@
-import type { GeocodingService, SearchResult, SearchOptions, Coordinates } from '@/components/SearchInput/types';
+import type { GeocodingService, SearchResult, SearchOptions } from '@/components/SearchInput/types';
+import type { Coordinates } from '@/types/geography';
 
 const NOMINATIM_URL = 'https://nominatim.openstreetmap.org';
 

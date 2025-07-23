@@ -79,8 +79,8 @@ describe('SearchInput Theme and Styling', () => {
     });
 
     it('should have elevated design with proper shadows', () => {
-      const { container } = render(<SearchInput {...defaultProps} />);
-      const wrapper = container.querySelector('.leaflet-search-input-wrapper');
+      render(<SearchInput {...defaultProps} />);
+      const wrapper = document.querySelector('.leaflet-search-input-wrapper');
       
       // Verify wrapper exists and has proper structure
       expect(wrapper).toBeInTheDocument();
@@ -118,8 +118,8 @@ describe('SearchInput Theme and Styling', () => {
     });
 
     it('should have proper dark mode colors with good contrast', () => {
-      const { container } = render(<SearchInput {...defaultProps} />);
-      const searchControl = container.querySelector('.leaflet-search-control');
+      render(<SearchInput {...defaultProps} />);
+      const searchControl = document.querySelector('.leaflet-search-control');
       
       // Verify dark mode class can be applied
       expect(searchControl).toBeInTheDocument();

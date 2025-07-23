@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback, RefObject } from 'react';
 import { SearchIcon, ClearIcon, SpinnerIcon } from '../Icons';
 import { SearchDropdown } from './SearchDropdown';
 import { NominatimGeocoder } from '@/services/geocoding/nominatim';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useClickOutside } from '@/hooks/useClickOutside';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import type { SearchInputProps, SearchResult, NominatimResult, GeocodingService } from './types';
+import type { SearchInputProps, SearchResult, NominatimResult } from './types';
 import './SearchInput.css';
 import './SearchInput.theme.css';
 
@@ -47,12 +47,12 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  const abortControllerRef = useRef<AbortController>();
+  const abortControllerRef = useRef<AbortController | undefined>(undefined);
   
   const debouncedQuery = useDebounce(query, debounceMs);
   
   // Close dropdown on outside click
-  useClickOutside(containerRef, () => setIsOpen(false));
+  useClickOutside(containerRef as RefObject<HTMLElement>, () => setIsOpen(false));
   
   // Perform search
   const performSearch = useCallback(async (searchQuery: string) => {
@@ -79,9 +79,9 @@ export const SearchInput: React.FC<SearchInputProps> = ({
       setSuggestions(results);
       setIsOpen(true);
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      if (error instanceof Error && error.name !== 'AbortError') {
         console.error('Search error:', error);
-        onError?.(error as Error);
+        onError?.(error);
         setSuggestions([]);
       }
     } finally {
