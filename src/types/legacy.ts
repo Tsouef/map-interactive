@@ -22,6 +22,6 @@ export function isLegacyZone(zone: unknown): zone is LegacyZone {
     zone !== null &&
     typeof zone === 'object' &&
     'coordinates' in zone &&
-    Array.isArray((zone as any).coordinates)
+    Array.isArray((zone as Record<string, unknown>).coordinates)
   );
 }

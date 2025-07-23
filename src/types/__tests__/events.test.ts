@@ -45,7 +45,7 @@ describe('Event Types', () => {
 
   it('should accept partial ZoneEvents', () => {
     const events: ZoneEvents = {
-      onZoneClick: (zone, event) => {
+      onZoneClick: (zone) => {
         console.log(zone.id);
       },
     };
@@ -56,7 +56,7 @@ describe('Event Types', () => {
 
   it('should accept valid MapEvents', () => {
     const events: MapEvents = {
-      onMapClick: (_event: LeafletMouseEvent) => {
+      onMapClick: () => {
         console.log('Map clicked');
       },
       onMapMoveEnd: (center: Coordinates, zoom: number) => {

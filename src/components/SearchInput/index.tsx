@@ -107,7 +107,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   
   // Debounced search function
   const debouncedSearch = useMemo(
-    () => debounce(searchLocations, debounceMs),
+    () => debounce((query: string) => { void searchLocations(query); }, debounceMs),
     [searchLocations, debounceMs]
   );
   

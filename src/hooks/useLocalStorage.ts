@@ -15,8 +15,8 @@ export function useLocalStorage<T>(
 ): [T, (value: T | ((prev: T) => T)) => void] {
   const { enabled = true } = options;
 
-  // Get initial value from localStorage or use provided initial value
-  const getStoredValue = useCallback((): T => {
+  // State to store value - initialize with a function to avoid recalculation
+  const [storedValue, setStoredValue] = useState<T>(() => {
     if (!enabled || typeof window === 'undefined') {
       return initialValue;
     }
@@ -28,10 +28,7 @@ export function useLocalStorage<T>(
       console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
-  }, [key, initialValue, enabled]);
-
-  // State to store value
-  const [storedValue, setStoredValue] = useState<T>(getStoredValue);
+  });
 
   // Return a wrapped version of useState's setter function that persists to localStorage
   const setValue = useCallback(
