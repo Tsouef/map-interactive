@@ -66,6 +66,12 @@ export function useZoneSelection(
     enableHistory ? new SelectionHistory(maxHistorySize) : null
   );
 
+  // Track history state for re-renders
+  const [historyState, setHistoryState] = useState({
+    canUndo: false,
+    canRedo: false
+  });
+
   // Persistence
   const [persistedSelection, setPersistentSelection] = useLocalStorage<string[]>(
     persistKey || '',
@@ -84,6 +90,25 @@ export function useZoneSelection(
       .map(id => zoneMap.get(id))
       .filter((zone): zone is Zone => zone !== undefined);
   }, [state.selectionOrder, zoneMap]);
+
+  // Initialize history with the initial state
+  useEffect(() => {
+    if (enableHistory && history.current && history.current.size() === 0) {
+      const initialState = {
+        selectedIds: new Set(initialSelection),
+        selectionOrder: initialSelection,
+        lastSelectedId: initialSelection[initialSelection.length - 1],
+        mode: state.mode,
+        constraints: state.constraints
+      };
+      history.current.push(initialState);
+      setHistoryState({
+        canUndo: false,
+        canRedo: false
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only on mount
 
   // Validation helper
   const validateSelection = useCallback((zonesToValidate: Zone[]): ValidationResult => {
@@ -136,12 +161,31 @@ export function useZoneSelection(
     }, debounceMs);
   }, [batchUpdates, debounceMs, onSelectionChange]);
 
-  // Save current state to history
-  const saveToHistory = useCallback(() => {
+  // Track if state has been initialized and if we're restoring from history
+  const isInitialized = useRef(false);
+  const isRestoringFromHistory = useRef(false);
+  
+  // Save state to history after it changes
+  useEffect(() => {
     if (enableHistory && history.current) {
-      history.current.push(state);
+      // Skip saving if we're restoring from history
+      if (isRestoringFromHistory.current) {
+        isRestoringFromHistory.current = false;
+        return;
+      }
+      
+      // Skip saving on the very first render after the initial state was already saved
+      if (isInitialized.current) {
+        history.current.push(state);
+        setHistoryState({
+          canUndo: history.current.canUndo(),
+          canRedo: history.current.canRedo()
+        });
+      } else {
+        isInitialized.current = true;
+      }
     }
-  }, [enableHistory, state]);
+  }, [state, enableHistory]);
 
   // Select zone
   const selectZone = useCallback((
@@ -173,8 +217,6 @@ export function useZoneSelection(
       }
     }
 
-    // Save to history before making changes
-    saveToHistory();
 
     // Create event
     const event: SelectionChangeEvent = {
@@ -208,7 +250,6 @@ export function useZoneSelection(
     state.selectedIds,
     selectedZones,
     validateSelection,
-    saveToHistory,
     batchDispatch,
     onSelectionChange,
     onSelectionError,
@@ -223,7 +264,6 @@ export function useZoneSelection(
     
     if (!zone || !state.selectedIds.has(zoneId)) return;
 
-    saveToHistory();
 
     batchDispatch({
       type: 'DESELECT_ZONE',
@@ -243,7 +283,6 @@ export function useZoneSelection(
     zoneMap,
     state.selectedIds,
     selectedZones,
-    saveToHistory,
     batchDispatch,
     onSelectionChange
   ]);
@@ -281,7 +320,6 @@ export function useZoneSelection(
       return;
     }
 
-    saveToHistory();
 
     batchDispatch({
       type: 'SELECT_MULTIPLE',
@@ -291,7 +329,6 @@ export function useZoneSelection(
     zoneMap,
     selectedZones,
     validateSelection,
-    saveToHistory,
     batchDispatch,
     onSelectionError
   ]);
@@ -303,7 +340,6 @@ export function useZoneSelection(
     
     if (validIds.length === 0) return;
 
-    saveToHistory();
 
     batchDispatch({
       type: 'DESELECT_MULTIPLE',
@@ -326,7 +362,6 @@ export function useZoneSelection(
   }, [
     state.selectedIds,
     selectedZones,
-    saveToHistory,
     batchDispatch,
     onSelectionChange,
     zoneMap
@@ -336,7 +371,6 @@ export function useZoneSelection(
   const clearSelection = useCallback(() => {
     if (state.selectedIds.size === 0) return;
 
-    saveToHistory();
 
     batchDispatch({ type: 'CLEAR_SELECTION' });
 
@@ -348,7 +382,7 @@ export function useZoneSelection(
         source: 'api'
       });
     }
-  }, [state.selectedIds, selectedZones, saveToHistory, batchDispatch, onSelectionChange]);
+  }, [state.selectedIds, selectedZones, batchDispatch, onSelectionChange]);
 
   // Select all zones
   const selectAll = useCallback((zonesToSelect = zones) => {
@@ -369,13 +403,12 @@ export function useZoneSelection(
       return;
     }
 
-    saveToHistory();
 
     batchDispatch({
       type: 'SELECT_MULTIPLE',
       payload: { zones: newZones }
     });
-  }, [zones, state.selectedIds, validateSelection, saveToHistory, batchDispatch, onSelectionError]);
+  }, [zones, state.selectedIds, validateSelection, batchDispatch, onSelectionError]);
 
   // Select by predicate
   const selectByPredicate = useCallback((predicate: (zone: Zone) => boolean) => {
@@ -434,7 +467,14 @@ export function useZoneSelection(
     
     const previousState = history.current.undo();
     if (previousState) {
+      isRestoringFromHistory.current = true;
       dispatch({ type: 'RESTORE_STATE', payload: previousState });
+      
+      // Update history state
+      setHistoryState({
+        canUndo: history.current.canUndo(),
+        canRedo: history.current.canRedo()
+      });
       
       // Trigger selection change callback
       if (onSelectionChange) {
@@ -457,7 +497,14 @@ export function useZoneSelection(
     
     const nextState = history.current.redo();
     if (nextState) {
+      isRestoringFromHistory.current = true;
       dispatch({ type: 'RESTORE_STATE', payload: nextState });
+      
+      // Update history state
+      setHistoryState({
+        canUndo: history.current.canUndo(),
+        canRedo: history.current.canRedo()
+      });
       
       // Trigger selection change callback
       if (onSelectionChange) {
@@ -541,10 +588,9 @@ export function useZoneSelection(
 
   // Load selection
   const loadSelection = useCallback((ids: string[]) => {
-    saveToHistory();
-
     const validIds = ids.filter(id => zoneMap.has(id));
     
+    isRestoringFromHistory.current = true;
     dispatch({
       type: 'RESTORE_STATE',
       payload: {
@@ -553,7 +599,7 @@ export function useZoneSelection(
         selectionOrder: validIds
       }
     });
-  }, [state, zoneMap, saveToHistory]);
+  }, [state, zoneMap]);
 
   // Persistence
   useEffect(() => {
@@ -613,8 +659,8 @@ export function useZoneSelection(
     // History
     undo,
     redo,
-    canUndo: history.current?.canUndo() || false,
-    canRedo: history.current?.canRedo() || false,
+    canUndo: historyState.canUndo,
+    canRedo: historyState.canRedo,
     
     // Hover
     setHoveredZone,

@@ -276,10 +276,16 @@ describe('useZoneSelection', () => {
         useZoneSelection(mockZones, { enableHistory: true })
       );
 
-      // Make selection and undo
+      // Make selections separately to allow effects to run
       act(() => {
         result.current.selectZone('zone-1');
+      });
+      
+      act(() => {
         result.current.selectZone('zone-2');
+      });
+      
+      act(() => {
         result.current.undo();
       });
 
