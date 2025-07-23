@@ -201,7 +201,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   return (
     <div 
       ref={containerRef}
-      className={`leaflet-search-control leaflet-search-${position} ${themeClasses} ${className || ''}`}
+      className={`leaflet-search-control leaflet-search-${position} ${themeClasses} ${className || ''} ${isLoading ? 'leaflet-search-loading' : ''}`}
       style={customStyles}
     >
       <div className="leaflet-search-input-wrapper">

@@ -1,72 +1,129 @@
-/* Leaflet Search Control positioning */
+/* Enhanced Leaflet Search Control */
 .leaflet-search-control {
   position: absolute;
   z-index: 1000;
-  width: 320px;
-  max-width: 90%;
+  width: 360px;
+  max-width: calc(100% - 40px);
 }
 
 .leaflet-search-topright {
-  top: 10px;
-  right: 10px;
+  top: 20px;
+  right: 20px;
 }
 
 .leaflet-search-topleft {
-  top: 10px;
-  left: 10px;
+  top: 20px;
+  left: 20px;
 }
 
 .leaflet-search-bottomright {
-  bottom: 10px;
-  right: 10px;
+  bottom: 20px;
+  right: 20px;
 }
 
 .leaflet-search-bottomleft {
-  bottom: 10px;
-  left: 10px;
+  bottom: 20px;
+  left: 20px;
 }
 
-/* Search input wrapper */
+/* Modern Search Input Wrapper */
 .leaflet-search-input-wrapper {
   position: relative;
   display: flex;
   align-items: center;
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.04),
+    0 4px 8px rgba(0, 0, 0, 0.04),
+    0 12px 24px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-/* Search icon */
+.leaflet-search-input-wrapper:hover {
+  box-shadow: 
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 6px 12px rgba(0, 0, 0, 0.06),
+    0 16px 32px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.leaflet-search-input-wrapper:has(.leaflet-search-input:focus) {
+  background: rgba(255, 255, 255, 1);
+  border-color: #0066cc;
+  box-shadow: 
+    0 0 0 3px rgba(0, 102, 204, 0.1),
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    0 20px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Search Icon */
 .leaflet-search-icon {
   position: absolute;
-  left: 12px;
+  left: 16px;
+  width: 20px;
+  height: 20px;
   color: #6b7280;
   pointer-events: none;
   z-index: 1;
+  transition: color 0.2s ease;
 }
 
-/* Search input */
+.leaflet-search-input-wrapper:hover .leaflet-search-icon {
+  color: #4b5563;
+}
+
+.leaflet-search-input-wrapper:has(.leaflet-search-input:focus) .leaflet-search-icon {
+  color: #0066cc;
+}
+
+/* Modern Search Input */
 .leaflet-search-input {
   flex: 1;
   border: none;
-  padding: 8px 32px;
-  padding-right: 40px;
-  font-size: 14px;
+  padding: 14px 44px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #1f2937;
   outline: none;
   background: transparent;
-  min-height: 44px; /* Touch-friendly */
+  min-height: 48px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.leaflet-search-input::placeholder {
+  color: #9ca3af;
+  font-weight: 400;
 }
 
 .leaflet-search-input:disabled {
-  background-color: #f3f4f6;
+  background-color: rgba(0, 0, 0, 0.02);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
-/* Spinner */
+/* Loading Spinner */
 .leaflet-search-spinner {
   position: absolute;
-  right: 40px;
+  right: 44px;
+  width: 18px;
+  height: 18px;
   animation: spin 0.8s linear infinite;
+  color: #0066cc;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s ease;
+}
+
+.leaflet-search-loading .leaflet-search-spinner {
+  opacity: 1;
+  transform: scale(1);
 }
 
 @keyframes spin {
@@ -75,7 +132,7 @@
   }
 }
 
-/* Clear button */
+/* Clear Button */
 .leaflet-search-clear {
   position: absolute;
   right: 8px;
@@ -83,65 +140,161 @@
   border: none;
   cursor: pointer;
   padding: 8px;
-  color: #6b7280;
+  color: #9ca3af;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.leaflet-search-input-wrapper:has(.leaflet-search-input:not(:placeholder-shown)) .leaflet-search-clear {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
 }
 
 .leaflet-search-clear:hover {
-  color: #374151;
+  background-color: rgba(0, 0, 0, 0.04);
+  color: #4b5563;
 }
 
-/* Dropdown */
+.leaflet-search-clear:active {
+  transform: scale(0.9);
+}
+
+/* Modern Dropdown */
 .leaflet-search-dropdown {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 8px);
   left: 0;
   right: 0;
-  margin-top: 4px;
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  max-height: 300px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.04),
+    0 10px 15px rgba(0, 0, 0, 0.06),
+    0 20px 40px rgba(0, 0, 0, 0.1);
+  max-height: 320px;
+  overflow: hidden;
+  animation: slideDown 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: top center;
+}
+
+.leaflet-search-dropdown-inner {
   overflow-y: auto;
+  max-height: 320px;
+  overscroll-behavior: contain;
 }
 
-/* Dropdown header */
+/* Custom scrollbar */
+.leaflet-search-dropdown-inner::-webkit-scrollbar {
+  width: 6px;
+}
+
+.leaflet-search-dropdown-inner::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.leaflet-search-dropdown-inner::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.leaflet-search-dropdown-inner::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dropdown Header */
 .leaflet-search-dropdown-header {
-  padding: 8px 12px;
-  font-size: 12px;
-  font-weight: 500;
+  padding: 10px 16px 8px;
+  font-size: 11px;
+  font-weight: 600;
   color: #6b7280;
-  border-bottom: 1px solid #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
-/* Suggestions */
+/* Modern Suggestions */
 .leaflet-search-suggestion {
   display: flex;
   align-items: flex-start;
-  padding: 12px;
+  padding: 12px 16px;
   cursor: pointer;
-  transition: background-color 0.1s;
-  min-height: 44px; /* Touch-friendly */
+  transition: all 0.15s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  position: relative;
+  overflow: hidden;
+}
+
+.leaflet-search-suggestion::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, rgba(0, 102, 204, 0.04) 0%, rgba(0, 102, 204, 0) 100%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.leaflet-search-suggestion:last-child {
+  border-bottom: none;
 }
 
 .leaflet-search-suggestion:hover {
-  background-color: #f3f4f6;
+  background-color: rgba(0, 102, 204, 0.04);
+}
+
+.leaflet-search-suggestion:hover::before {
+  opacity: 1;
 }
 
 .leaflet-search-suggestion.selected {
-  background-color: #ede9fe;
+  background-color: rgba(0, 102, 204, 0.08);
 }
 
-/* Suggestion icon */
+/* Suggestion Icon */
 .leaflet-search-suggestion-icon {
   margin-right: 12px;
+  width: 20px;
+  height: 20px;
   color: #6b7280;
   flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
-/* Suggestion content */
+.leaflet-search-suggestion:hover .leaflet-search-suggestion-icon {
+  color: #0066cc;
+  transform: scale(1.1);
+}
+
+/* Suggestion Content */
 .leaflet-search-suggestion-content {
   flex: 1;
   min-width: 0;
@@ -149,16 +302,22 @@
 
 .leaflet-search-suggestion-name {
   font-size: 14px;
+  font-weight: 500;
   color: #1f2937;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.4;
 }
 
 .leaflet-search-suggestion-name mark {
-  background-color: #fef3c7;
-  color: inherit;
-  font-weight: 500;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: #1f2937;
+  font-weight: 600;
+  padding: 1px 3px;
+  border-radius: 3px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .leaflet-search-suggestion-address {
@@ -168,56 +327,175 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+/* No results state */
+.leaflet-search-no-results {
+  padding: 24px 16px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* Error state */
+.leaflet-search-error {
+  padding: 16px;
+  text-align: center;
+  color: #ef4444;
+  font-size: 13px;
+  background: rgba(254, 226, 226, 0.5);
+  margin: 8px;
+  border-radius: 8px;
 }
 
 /* Dark theme support */
-.dark .leaflet-search-control {
-  --bg-color: #1f2937;
-  --text-color: #f3f4f6;
-  --border-color: #374151;
-  --hover-bg: #374151;
-  --selected-bg: #4b5563;
+.dark .leaflet-search-input-wrapper {
+  background: rgba(31, 41, 55, 0.95);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.dark .leaflet-search-input-wrapper,
-.dark .leaflet-search-dropdown {
-  background: var(--bg-color);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+.dark .leaflet-search-input-wrapper:has(.leaflet-search-input:focus) {
+  background: rgba(31, 41, 55, 1);
+  border-color: #3b82f6;
 }
 
 .dark .leaflet-search-input {
-  color: var(--text-color);
+  color: #f3f4f6;
+}
+
+.dark .leaflet-search-input::placeholder {
+  color: #6b7280;
+}
+
+.dark .leaflet-search-icon {
+  color: #9ca3af;
+}
+
+.dark .leaflet-search-input-wrapper:has(.leaflet-search-input:focus) .leaflet-search-icon {
+  color: #3b82f6;
+}
+
+.dark .leaflet-search-dropdown {
+  background: rgba(31, 41, 55, 0.98);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark .leaflet-search-dropdown-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.06);
+  color: #9ca3af;
+}
+
+.dark .leaflet-search-suggestion {
+  border-color: rgba(255, 255, 255, 0.04);
 }
 
 .dark .leaflet-search-suggestion:hover {
-  background-color: var(--hover-bg);
+  background-color: rgba(59, 130, 246, 0.08);
 }
 
 .dark .leaflet-search-suggestion.selected {
-  background-color: var(--selected-bg);
+  background-color: rgba(59, 130, 246, 0.16);
 }
 
 .dark .leaflet-search-suggestion-name {
-  color: var(--text-color);
+  color: #f3f4f6;
 }
 
-.dark .leaflet-search-dropdown-header,
+.dark .leaflet-search-suggestion-name mark {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #f3f4f6;
+}
+
 .dark .leaflet-search-suggestion-address {
+  color: #9ca3af;
+}
+
+.dark .leaflet-search-clear {
+  color: #6b7280;
+}
+
+.dark .leaflet-search-clear:hover {
+  background-color: rgba(255, 255, 255, 0.06);
   color: #9ca3af;
 }
 
 /* Mobile responsiveness */
 @media (max-width: 640px) {
   .leaflet-search-control {
-    width: calc(100% - 20px);
+    width: calc(100% - 40px);
     max-width: none;
   }
   
   .leaflet-search-topright,
+  .leaflet-search-topleft {
+    top: 16px;
+  }
+  
+  .leaflet-search-topright,
+  .leaflet-search-bottomright {
+    right: 20px;
+    left: 20px;
+  }
+  
   .leaflet-search-topleft,
-  .leaflet-search-bottomright,
   .leaflet-search-bottomleft {
-    left: 10px;
-    right: 10px;
+    left: 20px;
+    right: 20px;
+  }
+  
+  .leaflet-search-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    max-height: 50vh;
+    border-radius: 16px;
+  }
+  
+  .leaflet-search-dropdown-inner {
+    max-height: 50vh;
+  }
+}
+
+/* Focus visible for accessibility */
+.leaflet-search-input:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.leaflet-search-clear:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: 0;
+}
+
+.leaflet-search-suggestion:focus-visible {
+  outline: 2px solid #0066cc;
+  outline-offset: -2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .leaflet-search-input-wrapper {
+    border-width: 2px;
+    border-color: currentColor;
+  }
+  
+  .leaflet-search-input-wrapper:has(.leaflet-search-input:focus) {
+    border-color: #0066cc;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .leaflet-search-input-wrapper,
+  .leaflet-search-clear,
+  .leaflet-search-suggestion,
+  .leaflet-search-dropdown {
+    animation: none;
+    transition: none;
   }
 }

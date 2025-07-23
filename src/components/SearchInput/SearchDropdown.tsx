@@ -27,13 +27,14 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
       className={`leaflet-search-dropdown ${className || ''}`}
       role="listbox"
     >
-      {isHistory && (
-        <div className="leaflet-search-dropdown-header">
-          Recent searches
-        </div>
-      )}
-      
-      {suggestions.map((suggestion, index) => (
+      <div className="leaflet-search-dropdown-inner">
+        {isHistory && (
+          <div className="leaflet-search-dropdown-header">
+            Recent searches
+          </div>
+        )}
+        
+        {suggestions.map((suggestion, index) => (
         <div
           key={`${suggestion.displayName}-${index}`}
           data-key={`${suggestion.displayName}-${index}`}
@@ -61,6 +62,7 @@ export const SearchDropdown: React.FC<SearchDropdownProps> = ({
           </div>
         </div>
       ))}
+      </div>
     </div>
   );
 };
