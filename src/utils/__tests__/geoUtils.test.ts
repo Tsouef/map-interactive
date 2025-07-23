@@ -1,4 +1,3 @@
-import * as turf from '@turf/turf';
 import {
   calculateArea,
   calculatePerimeter,
@@ -81,7 +80,7 @@ describe('geoUtils', () => {
     });
 
     it('should throw error for invalid zone', () => {
-      const invalidZone = { ...mockSquareZone, geometry: null } as any;
+      const invalidZone = { ...mockSquareZone, geometry: null } as unknown as Zone;
       expect(() => calculateArea(invalidZone)).toThrow();
     });
   });

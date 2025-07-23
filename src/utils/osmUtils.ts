@@ -62,7 +62,7 @@ const USER_AGENT = 'LeafletZoneSelector/1.0 (https://github.com/username/leaflet
  */
 export class OSMCache {
   private static instance: OSMCache;
-  private cache: Map<string, { data: any; timestamp: number; ttl: number }>;
+  private cache: Map<string, { data: unknown; timestamp: number; ttl: number }>;
   private maxSize: number;
   private lastRequestTime: Map<string, number>;
 
@@ -79,11 +79,13 @@ export class OSMCache {
     return OSMCache.instance;
   }
 
-  set(key: string, data: any, ttl: number = 3600000): void { // Default 1 hour
+  set(key: string, data: unknown, ttl: number = 3600000): void { // Default 1 hour
     // Enforce size limit
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
     }
 
     this.cache.set(key, {
@@ -93,7 +95,7 @@ export class OSMCache {
     });
   }
 
-  get(key: string): any | null {
+  get<T = unknown>(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
 
@@ -103,7 +105,7 @@ export class OSMCache {
       return null;
     }
 
-    return entry.data;
+    return entry.data as T;
   }
 
   clear(): void {
@@ -137,14 +139,14 @@ export async function fetchCityBoundary(cityName: string, country?: string): Pro
   const cacheKey = `city:${cityName}:${country || ''}`;
   
   // Check cache first
-  const cached = cache.get(cacheKey);
+  const cached = cache.get<Zone>(cacheKey);
   if (cached) {
     return cached;
   }
 
   try {
     // First, search for the city using Nominatim
-    const searchParams: any = {
+    const searchParams: Record<string, string | number> = {
       q: country ? `${cityName}, ${country}` : cityName,
       format: 'geojson',
       limit: 1,
@@ -215,7 +217,7 @@ export async function searchLocation(query: string): Promise<SearchResult[]> {
   const cacheKey = `search:${query}`;
   
   // Check cache first
-  const cached = cache.get(cacheKey);
+  const cached = cache.get<SearchResult[]>(cacheKey);
   if (cached) {
     return cached;
   }
@@ -248,7 +250,7 @@ export async function fetchDistrictBoundaries(cityName: string, country?: string
   const cacheKey = `districts:${cityName}:${country || ''}`;
   
   // Check cache first
-  const cached = cache.get(cacheKey);
+  const cached = cache.get<Zone[]>(cacheKey);
   if (cached) {
     return cached;
   }
@@ -378,7 +380,7 @@ export function parseOverpassResponse(response: OverpassResponse): Array<{
 /**
  * Make a request to Nominatim API
  */
-export async function nominatimSearch(params: Record<string, any>): Promise<NominatimResult[]> {
+export async function nominatimSearch(params: Record<string, string | number>): Promise<NominatimResult[]> {
   const cache = OSMCache.getInstance();
   await cache.rateLimit('nominatim');
   
@@ -412,14 +414,28 @@ export async function nominatimSearch(params: Record<string, any>): Promise<Nomi
       return [];
     }
     // Convert GeoJSON FeatureCollection to NominatimResult format
-    return data.features.map((feature: any) => ({
-      place_id: feature.properties.place_id,
+    interface GeoJSONFeature {
+      properties: {
+        place_id?: number;
+        osm_type?: string;
+        osm_id?: number;
+        display_name?: string;
+        lat?: number;
+        lon?: number;
+        boundingbox?: string[];
+      };
+      geometry: Polygon | MultiPolygon;
+      bbox?: number[];
+    }
+    
+    return data.features.map((feature: GeoJSONFeature) => ({
+      place_id: feature.properties.place_id || 0,
       osm_type: feature.properties.osm_type,
       osm_id: feature.properties.osm_id,
-      display_name: feature.properties.display_name,
-      lat: String(feature.properties.lat || feature.geometry.coordinates[1]),
-      lon: String(feature.properties.lon || feature.geometry.coordinates[0]),
-      boundingbox: feature.properties.boundingbox || feature.bbox,
+      display_name: feature.properties.display_name || '',
+      lat: String(feature.properties.lat || 0),
+      lon: String(feature.properties.lon || 0),
+      boundingbox: feature.properties.boundingbox || (feature.bbox ? feature.bbox.map(String) : []),
       geojson: feature.geometry
     }));
   }

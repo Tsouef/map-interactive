@@ -8,7 +8,6 @@ import {
   nominatimSearch,
   parseNominatimResponse
 } from '../osmUtils';
-import type { Zone } from '../../types/zone';
 
 // Mock fetch for testing
 global.fetch = jest.fn();

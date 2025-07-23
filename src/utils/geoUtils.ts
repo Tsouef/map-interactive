@@ -1,5 +1,5 @@
 import * as turf from '@turf/turf';
-import type { Polygon, MultiPolygon, Feature } from 'geojson';
+import type { Polygon, MultiPolygon } from 'geojson';
 import type { Zone } from '../types/zone';
 import type { Coordinates, BoundingBox } from '../types/geography';
 
@@ -243,11 +243,11 @@ export function transformCoordinates(
   if (operation === 'swap') {
     if (Array.isArray(coordinates[0])) {
       // Array of coordinates
-      return (coordinates as Array<[number, number]>).map(coord => [coord[1], coord[0]]);
+      return (coordinates as Array<[number, number]>).map(coord => [coord[1], coord[0]] as [number, number]);
     } else {
       // Single coordinate
       const coord = coordinates as [number, number];
-      return [coord[1], coord[0]];
+      return [coord[1], coord[0]] as [number, number];
     }
   }
   return coordinates;
@@ -256,15 +256,17 @@ export function transformCoordinates(
 /**
  * Validates if a geometry is valid GeoJSON polygon or multipolygon
  */
-export function validateGeoJSON(geometry: any): boolean {
+export function validateGeoJSON(geometry: unknown): boolean {
   try {
     if (!geometry || typeof geometry !== 'object') return false;
     
-    if (geometry.type === 'Polygon') {
-      const polygon = turf.polygon(geometry.coordinates);
+    const geo = geometry as { type?: string; coordinates?: unknown };
+    
+    if (geo.type === 'Polygon' && Array.isArray(geo.coordinates)) {
+      const polygon = turf.polygon(geo.coordinates);
       return turf.booleanValid(polygon);
-    } else if (geometry.type === 'MultiPolygon') {
-      const multipolygon = turf.multiPolygon(geometry.coordinates);
+    } else if (geo.type === 'MultiPolygon' && Array.isArray(geo.coordinates)) {
+      const multipolygon = turf.multiPolygon(geo.coordinates);
       return turf.booleanValid(multipolygon);
     }
     
@@ -296,7 +298,10 @@ export function normalizeGeoJSON(geometry: Polygon | MultiPolygon): Polygon | Mu
     const polygon = turf.polygon(coords);
     const rewind = turf.rewind(polygon, { reverse: false });
     
-    return rewind.geometry;
+    if (rewind.type === 'Feature' && rewind.geometry) {
+      return rewind.geometry as Polygon;
+    }
+    return { type: 'Polygon', coordinates: coords } as Polygon;
   } else {
     // MultiPolygon
     const normalized = geometry.coordinates.map(polygonCoords => {
@@ -317,7 +322,10 @@ export function normalizeGeoJSON(geometry: Polygon | MultiPolygon): Polygon | Mu
       const polygon = turf.polygon(coords);
       const rewind = turf.rewind(polygon, { reverse: false });
       
-      return rewind.geometry.coordinates;
+      if (rewind.type === 'Feature' && rewind.geometry) {
+        return (rewind.geometry as Polygon).coordinates;
+      }
+      return coords;
     });
 
     return {
