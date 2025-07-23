@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 interface UseLocalStorageOptions {
   /** Whether to enable localStorage (useful for SSR) */
   enabled?: boolean;
+  /** Maximum number of items to store (for arrays) */
+  maxItems?: number;
 }
 
 /**
@@ -13,7 +15,7 @@ export function useLocalStorage<T>(
   initialValue: T,
   options: UseLocalStorageOptions = {}
 ): [T, (value: T | ((prev: T) => T)) => void] {
-  const { enabled = true } = options;
+  const { enabled = true, maxItems } = options;
 
   // State to store value - initialize with a function to avoid recalculation
   const [storedValue, setStoredValue] = useState<T>(() => {
@@ -35,7 +37,12 @@ export function useLocalStorage<T>(
     (value: T | ((prev: T) => T)) => {
       try {
         // Allow value to be a function so we have same API as useState
-        const valueToStore = value instanceof Function ? value(storedValue) : value;
+        let valueToStore = value instanceof Function ? value(storedValue) : value;
+        
+        // Apply maxItems limit if specified and value is an array
+        if (maxItems !== undefined && Array.isArray(valueToStore)) {
+          valueToStore = valueToStore.slice(0, maxItems) as T;
+        }
         
         // Save state
         setStoredValue(valueToStore);
@@ -48,7 +55,7 @@ export function useLocalStorage<T>(
         console.error(`Error setting localStorage key "${key}":`, error);
       }
     },
-    [key, storedValue, enabled]
+    [key, storedValue, enabled, maxItems]
   );
 
   // Listen for changes to localStorage from other tabs/windows

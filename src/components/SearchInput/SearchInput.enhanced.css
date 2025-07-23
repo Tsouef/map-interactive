@@ -1,0 +1,223 @@
+/* Leaflet Search Control positioning */
+.leaflet-search-control {
+  position: absolute;
+  z-index: 1000;
+  width: 300px;
+  max-width: 90%;
+}
+
+.leaflet-search-topright {
+  top: 10px;
+  right: 10px;
+}
+
+.leaflet-search-topleft {
+  top: 10px;
+  left: 10px;
+}
+
+.leaflet-search-bottomright {
+  bottom: 10px;
+  right: 10px;
+}
+
+.leaflet-search-bottomleft {
+  bottom: 10px;
+  left: 10px;
+}
+
+/* Search input wrapper */
+.leaflet-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+}
+
+/* Search icon */
+.leaflet-search-icon {
+  position: absolute;
+  left: 12px;
+  color: #6b7280;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Search input */
+.leaflet-search-input {
+  flex: 1;
+  border: none;
+  padding: 8px 32px;
+  padding-right: 40px;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
+  min-height: 44px; /* Touch-friendly */
+}
+
+.leaflet-search-input:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.leaflet-search-spinner {
+  position: absolute;
+  right: 40px;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Clear button */
+.leaflet-search-clear {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-search-clear:hover {
+  color: #374151;
+}
+
+/* Dropdown */
+.leaflet-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* Dropdown header */
+.leaflet-search-dropdown-header {
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Suggestions */
+.leaflet-search-suggestion {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  min-height: 44px; /* Touch-friendly */
+}
+
+.leaflet-search-suggestion:hover {
+  background-color: #f3f4f6;
+}
+
+.leaflet-search-suggestion.selected {
+  background-color: #ede9fe;
+}
+
+/* Suggestion icon */
+.leaflet-search-suggestion-icon {
+  margin-right: 12px;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+/* Suggestion content */
+.leaflet-search-suggestion-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.leaflet-search-suggestion-name {
+  font-size: 14px;
+  color: #1f2937;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.leaflet-search-suggestion-name mark {
+  background-color: #fef3c7;
+  color: inherit;
+  font-weight: 500;
+}
+
+.leaflet-search-suggestion-address {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Dark theme support */
+.dark .leaflet-search-control {
+  --bg-color: #1f2937;
+  --text-color: #f3f4f6;
+  --border-color: #374151;
+  --hover-bg: #374151;
+  --selected-bg: #4b5563;
+}
+
+.dark .leaflet-search-input-wrapper,
+.dark .leaflet-search-dropdown {
+  background: var(--bg-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.dark .leaflet-search-input {
+  color: var(--text-color);
+}
+
+.dark .leaflet-search-suggestion:hover {
+  background-color: var(--hover-bg);
+}
+
+.dark .leaflet-search-suggestion.selected {
+  background-color: var(--selected-bg);
+}
+
+.dark .leaflet-search-suggestion-name {
+  color: var(--text-color);
+}
+
+.dark .leaflet-search-dropdown-header,
+.dark .leaflet-search-suggestion-address {
+  color: #9ca3af;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .leaflet-search-control {
+    width: calc(100% - 20px);
+    max-width: none;
+  }
+  
+  .leaflet-search-topright,
+  .leaflet-search-topleft,
+  .leaflet-search-bottomright,
+  .leaflet-search-bottomleft {
+    left: 10px;
+    right: 10px;
+  }
+}

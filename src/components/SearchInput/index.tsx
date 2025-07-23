@@ -12,7 +12,10 @@ import {
 } from './utils';
 import './SearchInput.css';
 
-export const SearchInput: React.FC<SearchInputProps> = ({
+// Import the enhanced version for testing
+import { SearchInput as EnhancedSearchInput } from './SearchInput.enhanced';
+
+export const SearchInputOriginal: React.FC<SearchInputProps> = ({
   onLocationSelect,
   placeholder = 'Search for a city or postal code...',
   debounceMs = 300,
@@ -365,4 +368,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
   );
 };
 
-export type { SearchInputProps, NominatimResult } from './types';
+// Export the enhanced version as the default
+export const SearchInput = EnhancedSearchInput;
+
+export type { SearchInputProps, NominatimResult, SearchResult, GeocodingService } from './types';
